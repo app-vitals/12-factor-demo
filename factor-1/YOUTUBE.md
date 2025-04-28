@@ -301,6 +301,14 @@ If you're building AI systems and want them to work reliably in production rathe
 - Structured outputs vs direct command generation
 - Validation as a security layer
 
+**Generalizing beyond infrastructure**:
+- While our example focuses on cloud infrastructure automation, Factor 1 applies to any AI agent that translates natural language to actions:
+  * **Customer support agents**: Extracting customer intent (e.g., refund request, account change) before taking action
+  * **Content creation agents**: Converting vague requests ("write something upbeat about our product") into structured parameters
+  * **Research assistants**: Translating research questions into structured search queries and filtering parameters
+  * **Healthcare agents**: Converting patient descriptions into standardized medical parameters for assessment
+  * **Financial advisors**: Transforming financial goals into specific investment parameters and constraints
+
 **Engagement point**: "Have you ever built an AI agent that looked impressive in demos but fell apart in production? That's exactly the problem the 12-Factor Agents methodology solves."
 
 **Perspective contrast - Introduction & Series Context**:
@@ -640,6 +648,20 @@ Legend:
 - Production readiness checklist showing requirements met by stage
 - Implementation effort vs. security/reliability graph
 
+**Tool Evolution Framework for diverse agent types**:
+- This framework can be applied across different agent domains with consistent benefits:
+  * **Conversational agents**: Evolution from direct text generation to structured dialog management
+  * **Code generation agents**: Progress from generating unchecked code to validated, tested code snippets
+  * **Document processing agents**: Moving from simple text extraction to structured document analysis with validation
+  * **Media generation agents**: Advancing from direct image generation to parameterized, policy-compliant creation
+  * **Recommendation agents**: Evolving from simple preferences to validated, context-aware suggestions
+
+- The key principles remain consistent across domains:
+  * Separation of intent detection from execution
+  * Increasing validation sophistication
+  * Improved security boundaries
+  * Enhanced reliability and maintainability
+
 **Engagement point**: "Most AI agent tutorials stop at Stage 1 or 2, which is why they're impressive demos but security nightmares in production."
 
 **Audience participation prompt**: 
@@ -839,6 +861,22 @@ def create_aws_bucket(params):
 - Show the complete flow from natural language to SDK calls
 - Demonstrate error handling and recovery capabilities
 - Highlight integrations with existing systems (logging, monitoring, etc.)
+
+**Implementation patterns across agent domains**:
+- These implementation stages apply to all AI agent types with domain-specific adaptations:
+
+| Agent Type | Stage 1 Example | Stage 4 Example |
+|------------|----------------|-----------------|
+| **Customer Service** | LLM generates customer response text directly | Structured intent extraction with validation before authorized actions |
+| **Code Generation** | Direct code output without validation | Parameterized generation with static analysis and testing |
+| **Content Creation** | Raw text/image generation from prompts | Parameterized creation with brand guidelines enforcement |
+| **Data Analysis** | Direct SQL generation from NL request | Validated parameter extraction with access control and query optimization |
+| **Medical Assistance** | Direct diagnostic suggestions | Structured symptom extraction with evidence-based validation |
+
+- In all domains, the progression follows the same pattern:
+  * From direct generation to structured parameters
+  * From implicit trust to explicit validation
+  * From monolithic processing to separated components
 
 **Engagement point**: "This is the gold standard for production AI systems - complete separation of concerns with strong typing."
 
@@ -1103,6 +1141,22 @@ Security Controls at Each Boundary:
 - **Dave**: "What matters is that we end up with a system that's both secure and well-designed, regardless of which drove which."
 - **Dan**: "Exactly. Factor 1 brings software engineers and security teams together with a shared architecture that satisfies both."
 
+**Security considerations for different agent types**:
+
+| Agent Domain | Key Security Concerns | Factor 1 Mitigation Strategies |
+|--------------|----------------------|------------------------------|
+| **Financial Systems** | Unauthorized transactions, fraud | Parameter validation, transaction limits, audit logging |
+| **Healthcare** | PHI exposure, inaccurate medical advice | Data access controls, evidence verification, qualification of responses |
+| **Content Generation** | IP violations, brand damage | Content policy enforcement, output filtering, watermarking |
+| **Enterprise Assistants** | Data leakage, privilege escalation | Role-based access, information barriers, action validation |
+| **Customer Support** | Unauthorized account changes, social engineering | Identity verification, action authorization, sensitive data masking |
+
+- The security zone architecture remains consistent across domains:
+  * All user input treated as untrusted
+  * NLP processing outcomes subject to validation
+  * Business rules enforced before action execution
+  * Access controls applied based on validated parameters
+
 **Key security takeaway**: "Factor 1 isn't just about user experience - it's the foundation of your agent's security model. Getting this right means your entire agent system has a solid security foundation."
 
 ### Common Misconceptions About Factor 1
@@ -1151,6 +1205,13 @@ Security Controls at Each Boundary:
   - Document the expected inputs and outputs of your prompting layer
   - Implement safeguards against prompt injection attacks
   - Build an automatic validation pipeline for prompt changes
+
+- **Factor 2 applications across different agent types:**
+  - **Healthcare agents**: Version-controlled symptom extraction prompts with medical validation tests
+  - **Legal assistants**: Prompt libraries for different jurisdictions with regulatory compliance testing
+  - **Creative agents**: Managed prompt collections for different creative styles with brand guideline validation
+  - **Educational tutors**: Grade-appropriate prompt sets with developmental psychology validation
+  - **Customer support**: Multi-language prompt repositories with tone and brand consistency testing
 
 **Visual elements:**
 
