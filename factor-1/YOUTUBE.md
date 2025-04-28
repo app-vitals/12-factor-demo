@@ -1135,20 +1135,102 @@ Security Controls at Each Boundary:
 
 **Content points:**
 - Factor 1 establishes how natural language is translated to tool calls
-- Factor 2 focuses on maintaining direct control and visibility over the prompting process
-- Natural connection: the prompts we've shown in Factor 1 need proper management
-- Preview of prompt ownership challenges we'll address in next episode:
-  - Prompt versioning and change management
-  - Centralized prompt repositories
-  - Testing prompts for reliability and consistency
-  - Handling model version changes without breaking functionality
-  - Managing prompt templates separate from implementation
-  - Creating visibility into prompt performance
+- Factor 2 focuses on treating prompts as first-class code artifacts that require proper engineering practices
+- The prompts we've demonstrated in our Tool Evolution Framework are exactly what Factor 2 helps you manage effectively
+
+- **Direct connections to explain:**
+  - The structured JSON extraction prompt in Stage 3 needs versioning, testing, and deployment processes
+  - Our parameter extraction logic is a critical business asset that should be treated like production code
+  - As LLMs evolve (Claude 2 → Claude 3), prompts need careful management to maintain consistent behavior
+  - Prompt ownership applies to all stages, but becomes increasingly critical in Stages 3 and 4
+
+- **Key Factor 2 principles we'll explore in next episode:**
+  - Store prompts in version control with your application code (not embedded in the code)
+  - Develop a process for prompt maintenance similar to your code maintenance
+  - Create a regression testing suite for your prompts
+  - Document the expected inputs and outputs of your prompting layer
+  - Implement safeguards against prompt injection attacks
+  - Build an automatic validation pipeline for prompt changes
 
 **Visual elements:**
-- Preview graphic for Factor 2
-- Connection diagram showing how Factors 1 & 2 work together
-- Teaser examples of prompt management techniques
+
+1. **Factor 1 → Factor 2 Connection Diagram:**
+```
+┌─────────────────────────────┐     ┌─────────────────────────────┐
+│      FACTOR 1               │     │      FACTOR 2               │
+│  Natural Language to Tools  │     │     Own Your Prompts        │
+├─────────────────────────────┤     ├─────────────────────────────┤
+│                             │     │                             │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────┐  │
+│  │  NL Understanding   │────┼─────┼───▶│  Prompt Repository  │  │
+│  └─────────────────────┘    │     │    └─────────────────────┘  │
+│            │                │     │             │               │
+│            ▼                │     │             ▼               │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────┐  │
+│  │ Parameter Extraction│────┼─────┼───▶│  Version Control    │  │
+│  └─────────────────────┘    │     │    └─────────────────────┘  │
+│            │                │     │             │               │
+│            ▼                │     │             ▼               │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────┐  │
+│  │     Validation      │────┼─────┼───▶│   Testing Suite     │  │
+│  └─────────────────────┘    │     │    └─────────────────────┘  │
+│            │                │     │             │               │
+│            ▼                │     │             ▼               │
+│  ┌─────────────────────┐    │     │    ┌─────────────────────┐  │
+│  │     Execution       │────┼─────┼───▶│ Deployment Pipeline │  │
+│  └─────────────────────┘    │     │    └─────────────────────┘  │
+│                             │     │                             │
+└─────────────────────────────┘     └─────────────────────────────┘
+
+Each component of Factor 1 has a corresponding management process in Factor 2
+```
+
+2. **Prompt as Code Example:**
+```markdown
+# Parameter Extraction Prompt v1.2.3
+
+## Purpose
+Extracts structured parameters from natural language bucket creation requests.
+
+## Input
+Natural language request for bucket creation.
+
+## Output
+JSON object with provider, bucket_name, region, and purpose fields.
+
+## Expected Schema
+{
+  "provider": "aws" | "gcp",
+  "bucket_name": string,
+  "region": string,
+  "purpose": string
+}
+
+## Template
+"""
+Based on the user's request, extract the following parameters:
+- provider: 'aws' or 'gcp'
+- bucket_name: the name for the bucket
+- region: the region to create the bucket in
+- purpose: what the bucket will be used for
+
+Return only a JSON object with these fields.
+
+User request: {input}
+"""
+
+## Tests
+- "Create an S3 bucket named user-uploads" → {"provider": "aws", "bucket_name": "user-uploads"...}
+- "Make a GCP bucket called analytics-data" → {"provider": "gcp", "bucket_name": "analytics-data"...}
+```
+
+3. **Factor 2 Preview Checklist:**
+   - ✅ Version control for prompts
+   - ✅ Prompt testing and validation
+   - ✅ Deployment pipeline
+   - ✅ Documentation standards
+   - ✅ Prompt injection protection
+   - ✅ Regression testing
 
 ### Summary of key takeaways
 
@@ -1180,10 +1262,11 @@ Security Controls at Each Boundary:
 - Community links and resources
 
 **Perspective contrast - Conclusion**:
-- **Dan**: "Looking ahead to Factor 2, I'm excited about the software engineering implications of prompt management - how we version, test, and maintain prompts as code."
-- **Dave**: "While I'm thinking about the operational aspects - how we deploy prompts safely, monitor their performance, and ensure they meet security standards."
-- **Dan**: "That's the beauty of the 12-Factor methodology - it bridges our different perspectives while giving us a common language."
-- **Dave**: "Exactly. Factor 1 gave us the architecture foundation, and Factor 2 will build on that with prompt management practices."
+- **Dan**: "Looking ahead to Factor 2, I'm excited about applying software engineering principles to prompts - treating them as first-class code artifacts with versioning, testing, and continuous integration."
+- **Dave**: "I'm focused on the operational side - how we deploy prompts safely, prevent prompt injection attacks, and ensure consistent behavior across model versions."
+- **Dan**: "The cool thing is how Factor 1 and 2 fit together so naturally. The extraction prompt we just built is exactly what Factor 2 helps you version and manage."
+- **Dave**: "Definitely. If Factor 1 gives you architectural guardrails, Factor 2 ensures those guardrails stay in place as your system evolves. It's all about maintaining control of our AI systems."
+- **Dan**: "And just like we externalized our parameter extraction in Factor 1, Factor 2 recommends externalizing the prompts themselves for better management."
 
 **Final perspective integration**:
 - **Dan**: "What I've learned from this collaboration is that security and user experience aren't opposing forces - proper architecture enables both."
