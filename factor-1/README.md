@@ -1,6 +1,8 @@
 # Cloud Bucket Creator
 
-A tool that uses natural language processing to create storage buckets in different cloud providers (AWS S3 or Google Cloud Storage) based on simple text requests.
+https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-1-natural-language-to-tool-calls.md
+
+Create a tool that uses natural language processing to create storage buckets in different cloud providers (AWS S3 or Google Cloud Storage) based on simple text requests.
 
 ## Features
 
