@@ -30,6 +30,11 @@ DEFAULT_BUCKET_PREFIX = ""
 AWS_DEFAULT_REGION = ""
 GCP_DEFAULT_REGION = ""
 
+# Token usage tracking
+input_tokens = 0
+output_tokens = 0
+total_tokens = 0
+
 def load_defaults_from_project_file():
     """Load default settings from PROJECT.md file."""
     global DEFAULT_CLOUD_PROVIDER, DEFAULT_BUCKET_PREFIX, AWS_DEFAULT_REGION, GCP_DEFAULT_REGION
@@ -148,7 +153,12 @@ def create_gcs_bucket(bucket_name, region=GCP_DEFAULT_REGION):
 
 def process_natural_language(user_input):
     """Convert natural language to a tool call using LLM."""
-    global DEFAULT_CLOUD_PROVIDER, DEFAULT_BUCKET_PREFIX, AWS_DEFAULT_REGION, GCP_DEFAULT_REGION
+    global DEFAULT_CLOUD_PROVIDER, DEFAULT_BUCKET_PREFIX, AWS_DEFAULT_REGION, GCP_DEFAULT_REGION, input_tokens, output_tokens, total_tokens
+    
+    # Initialize token counters
+    input_tokens = 0
+    output_tokens = 0
+    total_tokens = 0
     
     system_prompt = f"""Convert the user request into a JSON object for creating a cloud storage bucket.
     
@@ -182,6 +192,11 @@ def process_natural_language(user_input):
     )
     
     response_text = message.content[0].text
+    
+    # Get token usage information
+    input_tokens = message.usage.input_tokens
+    output_tokens = message.usage.output_tokens
+    total_tokens = input_tokens + output_tokens
     
     # Extract JSON from response
     try:
@@ -227,6 +242,7 @@ def main():
         
         print(f"\n{Colors.BLUE}{Colors.BOLD}Command to be executed (AWS S3):{Colors.END}")
         print(f"{Colors.ORANGE}{command}{Colors.END}")
+        print(f"{Colors.BLUE}Tokens used: {Colors.ORANGE}{total_tokens}{Colors.BLUE} (Input: {input_tokens}, Output: {output_tokens}){Colors.END}")
         confirmation = input(f"\n{Colors.BLUE}{Colors.BOLD}Do you want to proceed? (y/n): {Colors.END}").strip().lower()
         
         if confirmation == 'y':
@@ -253,6 +269,7 @@ def main():
         
         print(f"\n{Colors.BLUE}{Colors.BOLD}Command to be executed (Google Cloud Storage):{Colors.END}")
         print(f"{Colors.ORANGE}{command}{Colors.END}")
+        print(f"{Colors.BLUE}Tokens used: {Colors.ORANGE}{total_tokens}{Colors.BLUE} (Input: {input_tokens}, Output: {output_tokens}){Colors.END}")
         confirmation = input(f"\n{Colors.BLUE}{Colors.BOLD}Do you want to proceed? (y/n): {Colors.END}").strip().lower()
         
         if confirmation == 'y':
