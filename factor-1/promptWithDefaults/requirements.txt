@@ -1,1 +1,3 @@
 anthropic
+azure-storage-blob
+azure-identity

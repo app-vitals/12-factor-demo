@@ -6,7 +6,7 @@ This file contains configuration settings for cloud storage buckets used by the 
 ## Cloud Provider Settings
 
 ### Default Provider
-- provider: AWS
+- provider: Google cloud
 
 ## Bucket Settings
 
@@ -18,3 +18,8 @@ This file contains configuration settings for cloud storage buckets used by the 
 
 ### Google Cloud Storage Settings
 - region: us-east2
+
+### Azure Blob Storage Settings
+- region: eastus
+- resource_group: rg-app-vitals
+- storage_account_type: Standard_LRS
