@@ -6,7 +6,7 @@ This file contains configuration settings for cloud storage buckets used by the 
 ## Cloud Provider Settings
 
 ### Default Provider
-- provider: Google cloud
+- provider: AWS
 
 ## Bucket Settings
 
