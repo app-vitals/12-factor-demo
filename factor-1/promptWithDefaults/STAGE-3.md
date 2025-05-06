@@ -1,4 +1,37 @@
 ```python
+    # dan's hack
+    class AWSRegion(str, Enum):
+        # US Regions
+        US_EAST_1 = "us-east-1"       # N. Virginia
+        US_EAST_2 = "us-east-2"       # Ohio
+        US_WEST_1 = "us-west-1"       # N. California
+        US_WEST_2 = "us-west-2"       # Oregon
+    class CreateS3Bucket(BaseModel):
+        bucket: str = Field(..., description="S3Uri of bucket to create")
+        region: Optional[AWSRegion] = Field(None, description="AWS region for the bucket")
+        profile: Optional[str] = Field(None, description="AWS profile to use")
+
+    tools = [
+        {
+            "input_schema": CreateS3Bucket.model_json_schema(),
+            "name": "create_bucket_tool",
+            "description": "A tool to create cloud storage buckets.",
+        }
+    ]
+    
+    message = client.messages.create(
+        model="claude-3-7-sonnet-20250219",
+        max_tokens=1000,
+        temperature=0,
+        system=system_prompt,
+        messages=[
+            {"role": "user", "content": user_input}
+        ],
+        tools=tools,
+    )
+```
+```python
+# claude's hack
 from typing import Dict, List, Optional, Union, Any, Literal
 import json
 import subprocess
@@ -457,8 +490,6 @@ def create_prompt(user_input):
     system_prompt = f"""
     You are an expert devops engineer configuring AWS S3 buckets. You have access to the following tools:
     
-    {format_tools_for_llm()}
-    
     When you need to use a tool, use the following format:
     
     <tool_call>
@@ -562,7 +593,7 @@ if __name__ == "__main__":
     prompt = create_prompt(user_input)
     
     # 2. Send prompt to LLM (not implemented here)
-    # llm_response = call_llm_api(prompt)
+    # llm_response = call_llm_api(prompt, tools=tools_for_llm())
     
     # Simulated LLM response for demonstration
     llm_response = """
@@ -595,3 +626,4 @@ if __name__ == "__main__":
     # 4. Use the results to create a response for the user
     print(json.dumps(results, indent=2))
 ```
+
