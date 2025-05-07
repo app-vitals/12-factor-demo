@@ -204,6 +204,16 @@ def get_tool_descriptions():
 
 
 def llm_request(messages):
+    """
+    Send a request to the Anthropic API and handle the response.
+
+    Args:
+        messages (list): List of messages to send to the LLM
+
+    Returns:
+        response: The response from the LLM
+    """
+
     # Check if ANTHROPIC_API_KEY is set
     if "ANTHROPIC_API_KEY" not in os.environ:
         print("Error: ANTHROPIC_API_KEY environment variable is not set")
