@@ -1,0 +1,4 @@
+anthropic==0.51.0
+boto3==1.38.11
+python-dotenv==1.1.0
+tokencost==0.1.20

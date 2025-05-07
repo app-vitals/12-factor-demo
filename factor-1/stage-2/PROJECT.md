@@ -1,4 +1,3 @@
-
 # Cloud Bucket Configuration
 
 This file contains configuration settings for cloud storage buckets used by the application.
@@ -14,7 +13,7 @@ This file contains configuration settings for cloud storage buckets used by the 
 - prefix: app-vitals-
 
 ### AWS S3 Settings
-- region: us-east-1
+- region: us-west-2
 
 ### Google Cloud Storage Settings
 - region: us-east2
