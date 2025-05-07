@@ -7,6 +7,87 @@ import anthropic
 import boto3
 from botocore.exceptions import ClientError
 
+def extract_region_code(region_str):
+    """
+    Helper function to extract AWS region code from a friendly region name
+    
+    Args:
+        region_str (str): Region name or code
+        
+    Returns:
+        str: AWS region code
+    """
+    region_name_map = {
+        "us-east-1": "us-east-1",
+        "northern virginia": "us-east-1",
+        "n. virginia": "us-east-1",
+        "virginia": "us-east-1",
+        
+        "us-east-2": "us-east-2",
+        "ohio": "us-east-2",
+        
+        "us-west-1": "us-west-1",
+        "northern california": "us-west-1",
+        "n. california": "us-west-1",
+        "california": "us-west-1",
+        
+        "us-west-2": "us-west-2",
+        "oregon": "us-west-2",
+        
+        "ca-central-1": "ca-central-1",
+        "canada": "ca-central-1",
+        "central": "ca-central-1",
+        "montreal": "ca-central-1",
+        
+        "eu-west-1": "eu-west-1",
+        "ireland": "eu-west-1",
+        "dublin": "eu-west-1",
+        
+        "eu-west-2": "eu-west-2",
+        "london": "eu-west-2",
+        "uk": "eu-west-2",
+        
+        "eu-west-3": "eu-west-3",
+        "paris": "eu-west-3",
+        "france": "eu-west-3",
+        
+        "eu-central-1": "eu-central-1",
+        "frankfurt": "eu-central-1",
+        "germany": "eu-central-1",
+        
+        "ap-northeast-1": "ap-northeast-1",
+        "tokyo": "ap-northeast-1",
+        "japan": "ap-northeast-1",
+        
+        "ap-northeast-2": "ap-northeast-2",
+        "seoul": "ap-northeast-2",
+        "korea": "ap-northeast-2",
+        
+        "ap-southeast-1": "ap-southeast-1",
+        "singapore": "ap-southeast-1",
+        
+        "ap-southeast-2": "ap-southeast-2",
+        "sydney": "ap-southeast-2",
+        "australia": "ap-southeast-2",
+        
+        "ap-south-1": "ap-south-1",
+        "mumbai": "ap-south-1",
+        "india": "ap-south-1",
+        
+        "sa-east-1": "sa-east-1",
+        "sao paulo": "sa-east-1",
+        "brazil": "sa-east-1"
+    }
+    
+    if not region_str:
+        return region_str
+    
+    # Convert to lowercase for case-insensitive matching
+    normalized_region = region_str.lower()
+    
+    # Return the mapped region code if available, otherwise return the original string
+    return region_name_map.get(normalized_region, region_str)
+
 def main():
     # Check if ANTHROPIC_API_KEY is set
     if "ANTHROPIC_API_KEY" not in os.environ:
@@ -25,7 +106,7 @@ def main():
             model="claude-3-7-sonnet-20250219",
             max_tokens=1000,
             temperature=0,
-            system="You are a helpful assistant that provides shell commands or uses tools to check AWS resources.",
+            system="You are a helpful assistant that converts friendly names to AWS resources and checks AWS resources. When given a region name like 'Oregon', 'Ohio', or 'Northern Virginia', convert it to the corresponding AWS region code (e.g., 'Oregon' = 'us-west-2', 'Ohio' = 'us-east-2', 'Northern Virginia' = 'us-east-1') before using it in any tools. Always convert friendly region names to their AWS region code counterparts.",
             tools=[is_valid_region_tool, bucket_exists_tool],
             tool_choice={"type": "any"},
             messages=[
@@ -59,16 +140,7 @@ def main():
                         continue
                     
                     print(f"\nProcessing bucket_exists tool with bucket_name='{bucket_name}' and region='{region}'")
-                    
-                    # Check if the region is valid first
-                    region_valid = is_valid_region(region)
-                    if not region_valid:
-                        print(f"\nInvalid AWS region: '{region}'")
-                        response_text = f"Error: '{region}' is not a valid AWS region."
-                        continue
-                    
-                    print(f"Region '{region}' is valid. Checking if bucket exists...")
-                    
+                                       
                     # Check if the bucket exists
                     result = bucket_exists(bucket_name, region)
                     
@@ -218,6 +290,15 @@ def is_valid_region(region):
             print(f"Invalid region format: '{region}'")
             return False
         
+        # Use the extract_region_code helper function to get AWS region code
+        mapped_region = extract_region_code(region)
+        
+        if mapped_region != region:
+            print(f"Mapped region '{region}' to AWS region code '{mapped_region}'")
+            region = mapped_region
+        else:
+            print(f"Using region as provided: '{region}'")
+        
         # Get the list of available regions using boto3 session
         session = boto3.session.Session()
         valid_regions = session.get_available_regions('s3')
@@ -247,6 +328,15 @@ def bucket_exists(bucket_name, region):
         if bucket_name is None or not isinstance(bucket_name, str) or bucket_name.strip() == "":
             print(f"Invalid bucket name: '{bucket_name}'")
             return False
+        
+        # Use the extract_region_code helper function to get AWS region code
+        mapped_region = extract_region_code(region)
+        
+        if mapped_region != region:
+            print(f"Mapped region '{region}' to AWS region code '{mapped_region}'")
+            region = mapped_region
+        else:
+            print(f"Using region as provided: '{region}'")
             
         # Create a boto3 client for S3 in the specified region
         s3_client = boto3.client('s3', region_name=region)

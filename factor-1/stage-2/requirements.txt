@@ -1,3 +1,1 @@
-anthropic
-azure-storage-blob
-azure-identity
+anthropic==0.12.0
