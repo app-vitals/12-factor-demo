@@ -22,7 +22,7 @@ def main():
     # Send request to Anthropic API
     try:
         message = client.messages.create(
-            model="claude-3-opus-20240229",
+            model="claude-3-7-sonnet-20250219",
             max_tokens=1000,
             temperature=0,
             system="You are a helpful assistant that provides shell commands or uses tools to check AWS resources.",
@@ -85,7 +85,7 @@ def main():
                         
                         # Send request to Anthropic API for bucket creation command
                         create_message = client.messages.create(
-                            model="claude-3-opus-20240229",
+                            model="claude-3-7-sonnet-20250219",
                             max_tokens=500,
                             temperature=0,
                             system="You are a helpful assistant that provides AWS CLI commands. Give ONLY the command with no explanation or markdown formatting.",
