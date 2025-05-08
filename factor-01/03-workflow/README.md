@@ -25,6 +25,22 @@ The `aws_tools.py` script implements a conversation-based workflow with multiple
 3. Each tool call requires explicit confirmation for actions that make changes
 4. The system maintains conversation context for multi-turn interactions
 
+```mermaid
+flowchart TD
+    A[Start] --> B[LLM: Analyze Messages]
+    B --> D{Tool Used?}
+    D -->|tool_use| E[Process Tool]
+    E --> F{Requires Confirm?}
+    F -->|Yes| G{Confirm?}
+    G -->|Yes| I[Execute]
+    G -->|No| J[Cancel]
+    F -->|No| I
+    I --> L[Add to Messages]
+    L --> B
+    D -->|end_turn| M[End]
+    J --> M
+```
+
 ## Architecture Improvements
 
 - Uses boto3 SDK directly instead of shell commands

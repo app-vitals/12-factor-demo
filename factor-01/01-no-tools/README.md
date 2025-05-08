@@ -13,6 +13,16 @@ The `simple_prompt.py` script demonstrates a basic approach where an LLM directl
 3. The command is shown to the user for confirmation
 4. If confirmed, the command is executed and the output is displayed
 
+```mermaid
+flowchart TD
+    A[Start] --> F[LLM]
+    F --> K{Confirm?}
+    K -- Yes --> L[Execute]
+    K -- No --> P[Cancel]
+    L --> Q[End]
+    P --> Q
+```
+
 ## Features
 
 - Minimal implementation with few lines of code

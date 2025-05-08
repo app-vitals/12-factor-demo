@@ -23,6 +23,20 @@ The `cloud_bucket_creator.py` script implements a constrained approach where the
 4. The generated command is shown to the user for confirmation
 5. If confirmed, the command is executed and the output is displayed
 
+```mermaid
+flowchart TD
+    A[Start] --> B[LLM: Analyze Input]
+    B --> D{LLM: AWS or GCP?}
+    D -- AWS --> E[AWS Tool]
+    D -- GCP --> F[GCP Tool]
+    E --> G{Confirm?}
+    F --> G
+    G -- Yes --> H[Execute]
+    G -- No --> I[Cancel]
+    H --> J[End]
+    I --> J
+```
+
 ## Requirements
 
 In addition to the [common requirements](../README.md#requirements), you'll need:
