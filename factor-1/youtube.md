@@ -9,9 +9,7 @@ GOTO https://github.com/humanlayer/12-factor-agents
 GOTO https://12factor.net/
 * It draws from the 12 Factor App methodology for building web applications.
 
-In this video, going to show you how to build a custom AI WhatsApp bot with Python. If you don’t know who I am, my name is Dave Ebbelaar and I'm the founder of Datalumina. I've been building custom data and AI solutions for the past 5 years and create educational videos like this to help you do the same and ultimately start freelancing.
-
-In this video we'll show you how to implement Factor 1 of the 12-Factor Agents methodology. if you don't know who we are, I'm Dan Mcaulay (AI Engineer) and this is Dave O'Dell (DevOps Engineer), we've both been building software for over 20 years.
+In this video we'll show you how to implement Factor 1 of the 12-Factor Agents methodology. If you don't know who we are, I'm Dan Mcaulay (AI Engineer) and this is Dave O'Dell (DevOps Engineer), we've both been building software for over 20 years.
 
 Factor 1 is the process of transforming natural language to tool calls. Our example uses cloud infrastructure, but the patterns we demonstrate apply to any AI agent you're building.
 
