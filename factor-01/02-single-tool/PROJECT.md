@@ -16,4 +16,4 @@ This file contains configuration settings for cloud storage buckets used by the 
 - region: us-west-2
 
 ### Google Cloud Storage Settings
-- region: us-east2
+- region: us-east1

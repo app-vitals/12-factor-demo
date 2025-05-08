@@ -21,9 +21,11 @@ def project_settings():
     Returns:
         str: Content of the PROJECT.md file
     """
-    with open("PROJECT.md", 'r') as file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_md_path = os.path.join(script_dir, "PROJECT.md")
+    with open(project_md_path, 'r') as file:
         return file.read()
-
+    
 def render_system_prompt():
     """
     Render the system prompt for the LLM.
@@ -113,7 +115,7 @@ def create_gcs_bucket(bucket_name, region):
     Returns:
         str: Output of the command execution
     """
-    return execute_command(f"gcloud storage buckets create gs://{bucket_name} --location={region}")
+    return execute_command(f"gsutil mb -l {region} gs://{bucket_name} ")
 
 
 TOOLS = {
