@@ -31,17 +31,13 @@ This approach has significant security implications:
 
 ## Usage
 
-1. Ensure you've installed the requirements from the parent directory
-2. Set your Anthropic API key:
-   ```bash
-   export ANTHROPIC_API_KEY=your_api_key_here
-   ```
-3. Run the script:
+1. Follow the installation steps in the [parent directory README](../README.md#getting-started)
+2. Run the script:
    ```bash
    python simple_prompt.py
    ```
-4. Enter a natural language description of the command you want to run
-5. Review the generated command and confirm whether to execute it
+3. Enter a natural language description of the command you want to run
+4. Review the generated command and confirm whether to execute it
 
 ## Example Prompts
 

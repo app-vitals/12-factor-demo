@@ -35,18 +35,13 @@ The `aws_tools.py` script implements a conversation-based workflow with multiple
 
 ## Requirements
 
-- Python 3.6+
-- Anthropic API key (set as environment variable)
+In addition to the [common requirements](../README.md#requirements), you'll need:
 - AWS credentials configured for boto3
 
 ## Installation
 
-1. Ensure you've installed the requirements from the parent directory
-2. Set your Anthropic API key:
-   ```bash
-   export ANTHROPIC_API_KEY=your_api_key_here
-   ```
-3. Configure AWS credentials:
+1. Follow the installation steps in the [parent directory README](../README.md#getting-started)
+2. Configure AWS credentials:
    ```bash
    aws configure
    ```

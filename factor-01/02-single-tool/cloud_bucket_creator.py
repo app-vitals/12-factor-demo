@@ -21,7 +21,7 @@ def project_settings():
     Returns:
         str: Content of the PROJECT.md file
     """
-    with open("stage-2/PROJECT.md", 'r') as file:
+    with open("PROJECT.md", 'r') as file:
         return file.read()
 
 def render_system_prompt():

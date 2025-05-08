@@ -25,19 +25,14 @@ The `cloud_bucket_creator.py` script implements a constrained approach where the
 
 ## Requirements
 
-- Python 3.6+
-- Anthropic API key (set as environment variable)
+In addition to the [common requirements](../README.md#requirements), you'll need:
 - AWS CLI (for AWS S3 buckets)
 - Google Cloud SDK (for GCP buckets)
 
 ## Installation
 
-1. Ensure you've installed the requirements from the parent directory
-2. Set your Anthropic API key:
-   ```bash
-   export ANTHROPIC_API_KEY=your_api_key_here
-   ```
-3. Make sure you have the appropriate cloud CLI tools configured:
+1. Follow the installation steps in the [parent directory README](../README.md#getting-started)
+2. Make sure you have the appropriate cloud CLI tools configured:
    - For AWS: `aws configure`
    - For GCP: `gcloud auth login`
 

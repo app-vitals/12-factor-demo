@@ -10,12 +10,6 @@ Factor 1 demonstrates the evolution of translating natural language commands int
 
 The examples in this directory showcase different approaches to handling natural language requests:
 
-1. **01-no-tools/** - LLM directly generates executable commands without structure or validation
-2. **02-single-tool/** - Cloud Bucket Creator with constraints and configuration management
-3. **03-workflow/** - AWS Tools with multi-step workflow and validation checks
-
-## Examples
-
 ### 01-no-tools
 
 The basic implementation where an LLM generates shell commands directly from user requests. This represents the simplest implementation but has significant security and reliability concerns.
