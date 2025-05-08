@@ -1,8 +1,10 @@
 # Cloud Bucket Creator
 
-https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-1-natural-language-to-tool-calls.md
+This directory contains a more structured implementation of Factor 1, demonstrating natural language enhanced commands with specific tools for creating cloud storage buckets.
 
-Create a tool that uses natural language processing to create storage buckets in different cloud providers (AWS S3 or Google Cloud Storage) based on simple text requests.
+## Overview
+
+The `cloud_bucket_creator.py` script implements a constrained approach where the LLM is limited to using specific tools for creating storage buckets in different cloud providers (AWS S3 or Google Cloud Storage) based on natural language requests.
 
 ## Features
 
@@ -11,6 +13,15 @@ Create a tool that uses natural language processing to create storage buckets in
 - Configurable defaults via PROJECT.md
 - Color-coded terminal interface (color-blind friendly)
 - Confirms command execution before running
+- Structured tool definitions with parameter validation
+
+## How It Works
+
+1. The user provides a natural language request to create a cloud storage bucket
+2. The system loads configuration defaults from PROJECT.md
+3. The LLM (Claude) processes the request and selects the appropriate tool
+4. The generated command is shown to the user for confirmation
+5. If confirmed, the command is executed and the output is displayed
 
 ## Requirements
 
@@ -21,18 +32,20 @@ Create a tool that uses natural language processing to create storage buckets in
 
 ## Installation
 
-1. Clone this repository
+1. Ensure you've installed the requirements from the parent directory
 2. Set your Anthropic API key:
-   ```
+   ```bash
    export ANTHROPIC_API_KEY=your_api_key_here
    ```
-3. Make sure you have the appropriate cloud CLI tools configured for your providers
+3. Make sure you have the appropriate cloud CLI tools configured:
+   - For AWS: `aws configure`
+   - For GCP: `gcloud auth login`
 
 ## Usage
 
 Run the script:
-```
-./cloud_bucket_creator.py
+```bash
+python cloud_bucket_creator.py
 ```
 
 Then enter your request in natural language:
@@ -65,14 +78,23 @@ Example configuration:
 - prefix: app-vitals-
 
 ### AWS S3 Settings
-- region: us-east-1
+- region: us-west-2
 
 ### Google Cloud Storage Settings
 - region: us-east2
 ```
 
-## Examples
+## Example Requests
 
 - "Create an S3 bucket named user-uploads"
 - "Make a GCS bucket called analytics-data in us-central1"
 - "Create a bucket for storing log files in the asia region"
+
+## Security Improvements
+
+Compared to the no-tools approach, this implementation:
+- Constrains the LLM to use only specific tools with defined parameters
+- Adds validation for tool inputs
+- Provides explicit configuration for defaults
+- Shows commands before execution
+- Limits actions to specific cloud operations

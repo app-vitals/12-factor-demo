@@ -16,41 +16,30 @@ This repository is organized by factors, with each directory containing:
 Currently implemented factors:
 
 - **Factor 1: Natural Language to Tool Calls** - Converting natural language instructions into structured tool invocations
-  - Cloud Bucket Creator implementation
-  - Tool Evolution Framework with four stages of maturity
-  - Security and production considerations
+  - No-tools example (simple direct command generation)
+  - Single-tool example (Cloud Bucket Creator)
+  - Workflow example (AWS Tools with validation)
 
 ## Factor 1: Natural Language to Tool Calls
 
 The first factor focuses on properly translating natural language requests into structured tool calls - the foundation of any AI agent system.
 
-### The Tool Evolution Framework
+### Example Implementations
 
-We introduce a maturity model for AI agent implementations:
+The Factor 1 directory contains three implementations showcasing different approaches to tool calls:
 
-1. **Stage 1: Direct Command Execution** - LLM directly generates executable commands
-2. **Stage 2: Natural Language Enhanced Commands** - Adds descriptions and constraints to prompts
-3. **Stage 3: Structured Tool Calls** - LLM produces structured data with validation
-4. **Stage 4: SDK Integration** - Bypasses shell commands for direct API usage
-
-### Cloud Bucket Creator Example
-
-The Factor 1 directory contains a complete implementation of the Cloud Bucket Creator tool, which demonstrates:
-
-- Natural language processing to extract structured parameters
-- Multiple validation layers
-- Cross-provider support (AWS S3 and Google Cloud Storage)
-- Markdown-based configuration
+1. **No-tools** - Simple implementation where the LLM directly generates shell commands
+2. **Single-tool (Cloud Bucket Creator)** - More structured approach for creating cloud storage buckets
+3. **Workflow (AWS Tools)** - Advanced implementation with multi-step validation workflow
 
 ### Getting Started with Factor 1
 
 ```bash
-cd factor-1
-python -m venv .venv
-source .venv/bin/activate
+cd factor-01
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=your_api_key_here
-python cloud_bucket_creator.py
 ```
 
 See the factor-specific README.md for detailed setup and usage instructions.
