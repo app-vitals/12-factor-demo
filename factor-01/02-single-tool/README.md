@@ -11,7 +11,6 @@ The `cloud_bucket_creator.py` script implements a constrained approach where the
 - Create AWS S3 buckets with natural language commands
 - Create Google Cloud Storage buckets with natural language commands
 - Configurable defaults via PROJECT.md
-- Color-coded terminal interface (color-blind friendly)
 - Confirms command execution before running
 - Structured tool definitions with parameter validation
 
