@@ -20,23 +20,32 @@ Quick setup:
 ```bash
 # Install dependencies (using uv)
 uv pip install -e .
-uv pip install crewai langchain-anthropic python-dotenv
+uv pip install crewai langchain-openai python-dotenv
 
 # Or using regular pip with virtualenv
 python -m venv .venv
 source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
 pip install -e .
-pip install crewai langchain-anthropic python-dotenv
+pip install crewai langchain-openai python-dotenv
 ```
 
 ### Configuration
 
-Add your Anthropic API key to the `.env` file:
+Add your OpenAI API key to the `.env` file or set it as an environment variable:
 
 ```
-ANTHROPIC_API_KEY=your_api_key_here
-MODEL=claude-3-5-sonnet-20240620
+# Set in .env file
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4o  # or any other OpenAI model you prefer
+
+# Or set as environment variable
+export OPENAI_API_KEY=your_openai_api_key_here
 ```
+
+> **Important**: Ensure your OpenAI account has sufficient quota for the model you're using. If you encounter a "RateLimitError: OpenAIException - You exceeded your current quota" error, you may need to:
+> 1. Check your [OpenAI usage dashboard](https://platform.openai.com/usage) to verify your current usage
+> 2. Add a payment method to your OpenAI account if using a free tier
+> 3. Consider using a less expensive model like `gpt-3.5-turbo` by setting `OPENAI_MODEL=gpt-3.5-turbo` in your `.env` file
 
 ## Running the DevOps Knowledge Assistant
 
@@ -50,6 +59,9 @@ crewai run
 
 # Set a custom question via environment variable
 DEVOPS_QUESTION="What is Kubernetes?" crewai run
+
+# Enable debugging output
+DEVOPS_DEBUG=true crewai run
 ```
 
 ### Using the included run script
@@ -94,13 +106,29 @@ The assistant can answer questions like:
 
 ## Customizing the Knowledge Base
 
-The assistant uses information from markdown files located in the `knowledge/` directory. You can:
+The assistant uses information from markdown files located in the `knowledge/` directory at the root of your project. This location is required by crewAI - it automatically looks for knowledge files in this specific directory.
+
+You can:
 
 1. Add new markdown files to expand the knowledge base
 2. Update existing files to improve or correct information
 3. Remove files you don't need
 
-After modifying the knowledge base, update the file paths in `src/chatbot/crew.py` to reflect your changes.
+After modifying the knowledge base:
+
+1. Update the list of files in `src/chatbot/crew.py` for both agents:
+   ```python
+   knowledge_files = TextFileKnowledgeSource(
+       file_paths=[
+           "your-new-file.md",
+           "existing-file.md",
+           # Add or remove files as needed
+       ]
+   )
+   ```
+
+2. Use relative file paths (no leading slash), as these are relative to the `knowledge/` directory
+3. Ensure your files exist in the `knowledge/` directory, not elsewhere
 
 ## How It Works
 
