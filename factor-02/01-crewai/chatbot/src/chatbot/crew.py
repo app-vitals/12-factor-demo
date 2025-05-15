@@ -3,27 +3,48 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from typing import List, Optional
-from chatbot.config.api_config import get_anthropic_llm
 import os
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+
+# Fix import for both package mode and direct execution
+try:
+    from chatbot.config.api_config import get_anthropic_llm  # When installed as a package
+except ImportError:
+    from src.chatbot.config.api_config import get_anthropic_llm  # When running directly
 
 @CrewBase
 class Chatbot():
-    """Chatbot crew"""
+    """DevOps and Engineering Knowledge Assistant chatbot"""
 
     agents: List[BaseAgent]
     tasks: List[Task]
-
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
-    def researcher(self) -> Agent:
+    def knowledge_researcher(self) -> Agent:
+        """Create the knowledge researcher agent"""
+        # Create text file knowledge sources
+        knowledge_files = TextFileKnowledgeSource(
+            file_paths=[
+                "code-review-guidelines.md",
+                "blue-green-deployment.md",
+                "error-rate-runbook.md",
+                "kubernetes-cluster-setup.md",
+                "database-outage.md"
+            ]
+        )
+        
+        # Get Anthropic LLM
+        anthropic_llm = get_anthropic_llm()
+        
+        return Agent(
+            config=self.agents_config['knowledge_researcher'], # type: ignore[index]
+            verbose=True,
+            knowledge_sources=[knowledge_files],
+            llm=anthropic_llm
+        )
+
+    @agent
+    def devops_assistant(self) -> Agent:
+        """Create the DevOps assistant agent"""
         # Create text file knowledge sources
         knowledge_files = TextFileKnowledgeSource(
             file_paths=[
@@ -38,56 +59,29 @@ class Chatbot():
         anthropic_llm = get_anthropic_llm()
         
         return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
+            config=self.agents_config['devops_assistant'], # type: ignore[index]
             verbose=True,
             knowledge_sources=[knowledge_files],
             llm=anthropic_llm
         )
 
-    @agent
-    def reporting_analyst(self) -> Agent:
-        # Create text file knowledge sources
-        knowledge_files = TextFileKnowledgeSource(
-            file_paths=[
-                "code-review-guidelines.md",
-                "blue-green-deployment.md",
-                "error-rate-runbook.md",
-                "kubernetes-cluster-setup.md"
-            ]
-        )
-        
-        # Get Anthropic LLM
-        anthropic_llm = get_anthropic_llm()
-        
-        return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True,
-            knowledge_sources=[knowledge_files],
-            llm=anthropic_llm
-        )
-
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
-    def research_task(self) -> Task:
+    def research_query(self) -> Task:
+        """Create the research query task"""
         return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
+            config=self.tasks_config['research_query'], # type: ignore[index]
         )
 
     @task
-    def reporting_task(self) -> Task:
+    def formulate_answer(self) -> Task:
+        """Create the formulate answer task"""
         return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
+            config=self.tasks_config['formulate_answer'], # type: ignore[index]
         )
 
     @crew
     def crew(self) -> Crew:
-        """Creates the Chatbot crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-        
+        """Creates the DevOps Knowledge Assistant crew"""
         # Set dummy OpenAI key to prevent errors
         os.environ["OPENAI_API_KEY"] = "dummy_key"
         
@@ -95,10 +89,33 @@ class Chatbot():
         anthropic_llm = get_anthropic_llm()
 
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
             llm=anthropic_llm
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )
+        
+    def ask(self, question: str) -> str:
+        """
+        Ask a question to the DevOps Knowledge Assistant
+        
+        Args:
+            question: The user's question about DevOps or engineering topics
+            
+        Returns:
+            str: The assistant's response
+        """
+        # Set dummy OpenAI key to prevent errors
+        os.environ["OPENAI_API_KEY"] = "dummy_key"
+        
+        # Run the crew with the user's question
+        inputs = {
+            "user_question": question
+        }
+        
+        # Execute the crew and get the result
+        result = self.crew().kickoff(inputs=inputs)
+        
+        # Return the answer from the final task
+        return result
