@@ -1,25 +1,24 @@
 #!/usr/bin/env python
 import os
 from dotenv import load_dotenv
-from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
 
 # Load environment variables
 load_dotenv()
 
 # Get API keys from environment
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-MODEL = os.getenv("MODEL", "claude-3-5-sonnet-20240620")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 
-# Configure Anthropic model
-def get_anthropic_llm():
+# Configure OpenAI model
+def get_openai_llm():
     """
-    Returns a configured Anthropic LLM instance
+    Returns a configured OpenAI LLM instance
     """
-    if not ANTHROPIC_API_KEY:
-        raise ValueError("ANTHROPIC_API_KEY environment variable is not set")
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY environment variable is not set")
     
-    return ChatAnthropic(
+    return ChatOpenAI(
         model=MODEL,
-        anthropic_api_key=ANTHROPIC_API_KEY,
         temperature=0.7
     )

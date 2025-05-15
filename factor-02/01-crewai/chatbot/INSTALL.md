@@ -16,7 +16,7 @@ If you have uv installed, you can use it to set up everything:
 uv pip install -e .
 
 # Install extra development dependencies
-uv pip install crewai langchain-anthropic python-dotenv
+uv pip install crewai langchain-openai python-dotenv
 ```
 
 ### Using pip with virtualenv
@@ -32,7 +32,7 @@ source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
 pip install -e .
 
 # Install required dependencies
-pip install crewai langchain-anthropic python-dotenv
+pip install crewai langchain-openai python-dotenv
 ```
 
 ## Configuration
@@ -40,11 +40,11 @@ pip install crewai langchain-anthropic python-dotenv
 1. Create or update the `.env` file in the project root directory:
 
 ```
-ANTHROPIC_API_KEY=your_api_key_here
-MODEL=claude-3-5-sonnet-20240620
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4o  # or any other OpenAI model you prefer
 ```
 
-2. Make sure your Anthropic API key is valid. You can get an API key from [https://console.anthropic.com/](https://console.anthropic.com/).
+2. Make sure your OpenAI API key is valid. You can get an API key from [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
 ## Verifying Installation
 
@@ -65,14 +65,14 @@ If you encounter errors related to missing modules:
 3. If using a virtualenv, try reinstalling with:
    ```bash
    pip install -e .
-   pip install crewai langchain-anthropic python-dotenv
+   pip install crewai langchain-openai python-dotenv
    ```
 
-If you see an error about ANTHROPIC_API_KEY not being set:
+If you see an error about OPENAI_API_KEY not being set:
 
 1. Check that your `.env` file is in the project root directory
 2. Make sure the API key in the `.env` file is valid
 3. Try setting the environment variable directly:
    ```bash
-   export ANTHROPIC_API_KEY=your_api_key_here  # On Windows, use `set ANTHROPIC_API_KEY=your_api_key_here`
+   export OPENAI_API_KEY=your_openai_api_key_here  # On Windows, use `set OPENAI_API_KEY=your_openai_api_key_here`
    ```
