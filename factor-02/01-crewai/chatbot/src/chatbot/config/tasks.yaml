@@ -1,35 +1,18 @@
 research_query:
   description: >
-    IMPORTANT: You MUST ONLY use information from the knowledge base files to answer this question: "{user_question}"
-    
-    Your main task is to extract relevant content from the knowledge files that directly addresses this question.
-    DO NOT use your own knowledge unless absolutely necessary. Prioritize finding exact matches or related
-    content in the knowledge files. 
-    
-    If there are multiple knowledge files with relevant information, combine their insights.
-    If the knowledge base doesn't contain specific information to answer the question, clearly state 
-    "The knowledge base does not contain information about this topic."
-    
-    IMPORTANT: Include direct quotes and specific details from the knowledge files. 
-    Mention which knowledge file each piece of information comes from.
+    Search the knowledge base, including markdown files, to answer: '{user_question}'. 
+    Only return information from the knowledge sources. If the knowledge sources do not contain an answer, note the limitation.
+
   expected_output: >
-    Specific findings from the knowledge base that directly answer '{user_question}', including direct quotes, 
-    file names, and exact details found in the knowledge files. If no relevant information exists in the knowledge base,
-    explicitly state this limitation.
+    Accurate findings from the knowledge base, especially markdown files, answering '{user_question}', including relevant details or steps. 
+    If no specific answer exists, note the limitation.
+
   agent: knowledge_researcher
 
 formulate_answer:
   description: >
-    Using ONLY the research provided from the knowledge base, create a clear, concise answer to '{user_question}'
-    as an experienced DevOps engineer. Do not introduce new information that wasn't in the research.
-    
-    IMPORTANT: Your answer must be directly based on the knowledge base content. If the research indicates
-    the knowledge base doesn't have information on this topic, acknowledge this limitation in your response.
-    
-    Organize the information logically, including specific details, commands, or procedures mentioned in the 
-    knowledge files. Make sure to maintain technical accuracy while keeping the explanation accessible.
+    Using the research, provide a clear, concise answer to '{user_question}' as an experienced DevOps engineer. 
+    Only return information from the knowledge sources. If the knowledge sources do not contain an answer, note the limitation.
   expected_output: >
-    A clear, concise answer that directly reflects the information found in the knowledge base. The answer should
-    maintain technical accuracy while being accessible, and should never introduce information not found in the
-    provided research. If the knowledge base lacks information on the topic, acknowledge this limitation clearly.
+    A clear, concise, technically accurate answer to '{user_question}', reflecting details or steps from markdown files in the knowledge base. If no specific answer exists, note the limitation.
   agent: devops_assistant

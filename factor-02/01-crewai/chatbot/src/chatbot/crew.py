@@ -2,11 +2,9 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
-from typing import List, Optional
+from typing import List
 import os
-import sys
 import logging
-from pathlib import Path
 
 # Configure logging
 log_level = logging.DEBUG if os.environ.get("DEVOPS_DEBUG", "").lower() in ["1", "true", "yes"] else logging.INFO
@@ -22,8 +20,6 @@ try:
     from chatbot.config.api_config import get_openai_llm  # When installed as a package
 except ImportError:
     from src.chatbot.config.api_config import get_openai_llm  # When running directly
-
-# No custom directory handling needed - crewAI looks for files in the ./knowledge directory
 
 @CrewBase
 class Chatbot():
@@ -42,7 +38,8 @@ class Chatbot():
                 "blue-green-deployment.md",
                 "error-rate-runbook.md",
                 "kubernetes-cluster-setup.md",
-                "database-outage.md"
+                "database-outage.md",
+                "argocd.md"
             ]
         )
         
@@ -69,7 +66,8 @@ class Chatbot():
                 "blue-green-deployment.md",
                 "error-rate-runbook.md",
                 "kubernetes-cluster-setup.md",
-                "database-outage.md"
+                "database-outage.md",
+                "argocd.md"
             ]
         )
         
@@ -106,56 +104,22 @@ class Chatbot():
         # Get OpenAI LLM for the crew
         openai_llm = get_openai_llm()
 
-        return Crew(
-            agents=self.agents,
-            tasks=self.tasks,
-            process=Process.sequential,
-            verbose=True,
-            llm=openai_llm
-        )
-        
-    def ask(self, question: str) -> str:
-        """
-        Ask a question to the DevOps Knowledge Assistant
-        
-        Args:
-            question: The user's question about DevOps or engineering topics
-            
-        Returns:
-            str: The assistant's response
-        """
-        # Log information about the question for debugging
-        logger.info(f"Processing question: {question}")
-        
-        # Check if knowledge files exist in standard location
-        knowledge_dir = Path("knowledge")
-        if knowledge_dir.exists():
-            logger.info(f"Knowledge directory found at ./knowledge")
-            # Check if required knowledge files exist
-            for filename in [
+        knowledge_files = TextFileKnowledgeSource(
+            file_paths=[
                 "code-review-guidelines.md",
                 "blue-green-deployment.md",
                 "error-rate-runbook.md",
                 "kubernetes-cluster-setup.md",
-                "database-outage.md"
-            ]:
-                file_path = knowledge_dir / filename
-                if file_path.exists():
-                    logger.info(f"Knowledge file exists: {filename}")
-                else:
-                    logger.warning(f"Knowledge file MISSING: {filename}")
-        else:
-            logger.warning("Knowledge directory not found in ./knowledge")
-                
-        # Run the crew with the user's question
-        inputs = {
-            "user_question": question
-        }
-        
-        # Execute the crew and get the result
-        try:
-            result = self.crew().kickoff(inputs=inputs)
-            return result
-        except Exception as e:
-            logger.error(f"Error running crew: {str(e)}")
-            return f"I encountered an error while processing your question. Error details: {str(e)}"
+                "database-outage.md",
+                "argocd.md"
+            ]
+        )
+
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+             knowledge_sources=[knowledge_files],
+            verbose=True,
+            llm=openai_llm
+        )

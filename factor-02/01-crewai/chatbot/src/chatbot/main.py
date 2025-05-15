@@ -3,12 +3,18 @@ import sys
 import warnings
 import os
 import argparse
+import logging
 
 # Fix import for both package mode and direct execution
 try:
     from chatbot.crew import Chatbot  # When installed as a package
 except ImportError:
     from src.chatbot.crew import Chatbot  # When running directly
+
+# Configure logging
+log_level = logging.DEBUG if os.environ.get("DEVOPS_DEBUG", "").lower() in ["1", "true", "yes"] else logging.INFO
+logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('devops_assistant_main')
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -24,11 +30,12 @@ def run():
     import sys
     running_through_crewai = not sys.stdin.isatty() or "--non-interactive" in sys.argv
     
-    assistant = Chatbot()
+    # Create chatbot crew instance
+    chatbot = Chatbot()
+    crew_instance = chatbot.crew()
     
     if running_through_crewai:
         # When running through crewai run, use a default question or get from environment variable
-        import os
         default_question = os.environ.get(
             "DEVOPS_QUESTION", 
             "What is blue-green deployment? Keep your answer brief."
@@ -36,9 +43,12 @@ def run():
         print(f"\nRunning in non-interactive mode with question: '{default_question}'\n")
         
         try:
-            answer = assistant.ask(default_question)
-            print(f"\nAnswer: {answer}\n")
+            # Use native crewAI to execute the crew with the question
+            inputs = {"user_question": default_question}
+            result = crew_instance.kickoff(inputs=inputs)
+            print(f"\nAnswer: {result}\n")
         except Exception as e:
+            logger.error(f"Error running crew: {str(e)}")
             print(f"\nError: {str(e)}")
         
         return
@@ -63,15 +73,17 @@ def run():
                 if not user_input.strip():
                     continue
                     
-                # Process the question
+                # Process the question using native crewAI
                 print("\nThinking...\n")
-                answer = assistant.ask(user_input)
-                print(f"Assistant: {answer}")
+                inputs = {"user_question": user_input}
+                result = crew_instance.kickoff(inputs=inputs)
+                print(f"Assistant: {result}")
             except EOFError:
                 # Handle EOF error (happens when stdin is closed)
                 print("\nDetected closed input stream. Exiting.")
                 break
             except Exception as e:
+                logger.error(f"Error processing question: {str(e)}")
                 print(f"\nSorry, I encountered an error: {str(e)}")
                 print("Please try asking your question in a different way.")
                 
@@ -86,10 +98,16 @@ def ask_question(question):
         question: The user's question to ask the assistant
     """
     try:
-        assistant = Chatbot()
-        answer = assistant.ask(question)
-        print(f"\nQ: {question}\n\nA: {answer}\n")
+        # Create chatbot crew instance
+        chatbot = Chatbot()
+        crew_instance = chatbot.crew()
+        
+        # Use native crewAI to execute the crew with the question
+        inputs = {"user_question": question}
+        result = crew_instance.kickoff(inputs=inputs)
+        print(f"\nQ: {question}\n\nA: {result}\n")
     except Exception as e:
+        logger.error(f"Error processing question: {str(e)}")
         print(f"Error: {str(e)}")
 
 def process_command_line():
