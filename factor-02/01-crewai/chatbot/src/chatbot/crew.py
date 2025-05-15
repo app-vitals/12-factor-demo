@@ -1,7 +1,10 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from typing import List
+from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
+from typing import List, Optional
+from chatbot.config.api_config import get_anthropic_llm
+import os
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
@@ -21,16 +24,46 @@ class Chatbot():
     # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
     def researcher(self) -> Agent:
+        # Create text file knowledge sources
+        knowledge_files = TextFileKnowledgeSource(
+            file_paths=[
+                "code-review-guidelines.md",
+                "blue-green-deployment.md",
+                "error-rate-runbook.md",
+                "kubernetes-cluster-setup.md"
+            ]
+        )
+        
+        # Get Anthropic LLM
+        anthropic_llm = get_anthropic_llm()
+        
         return Agent(
             config=self.agents_config['researcher'], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            knowledge_sources=[knowledge_files],
+            llm=anthropic_llm
         )
 
     @agent
     def reporting_analyst(self) -> Agent:
+        # Create text file knowledge sources
+        knowledge_files = TextFileKnowledgeSource(
+            file_paths=[
+                "code-review-guidelines.md",
+                "blue-green-deployment.md",
+                "error-rate-runbook.md",
+                "kubernetes-cluster-setup.md"
+            ]
+        )
+        
+        # Get Anthropic LLM
+        anthropic_llm = get_anthropic_llm()
+        
         return Agent(
             config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            knowledge_sources=[knowledge_files],
+            llm=anthropic_llm
         )
 
     # To learn more about structured task outputs,
@@ -54,11 +87,18 @@ class Chatbot():
         """Creates the Chatbot crew"""
         # To learn how to add knowledge sources to your crew, check out the documentation:
         # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
+        
+        # Set dummy OpenAI key to prevent errors
+        os.environ["OPENAI_API_KEY"] = "dummy_key"
+        
+        # Get Anthropic LLM for the crew
+        anthropic_llm = get_anthropic_llm()
 
         return Crew(
             agents=self.agents, # Automatically created by the @agent decorator
             tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
+            llm=anthropic_llm
             # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )

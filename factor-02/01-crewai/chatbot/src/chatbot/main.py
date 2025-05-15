@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import sys
 import warnings
+import os
 
 from datetime import datetime
-
 from chatbot.crew import Chatbot
+from chatbot.config.api_config import get_anthropic_llm
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -23,6 +24,10 @@ def run():
     }
     
     try:
+        # Configure environment for crewAI
+        os.environ["OPENAI_API_KEY"] = "dummy_key"  # Prevent OpenAI errors
+        
+        # Run with Anthropic (LLM is configured in the crew.py file)
         Chatbot().crew().kickoff(inputs=inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
@@ -37,6 +42,9 @@ def train():
         'current_year': str(datetime.now().year)
     }
     try:
+        # Configure environment for crewAI
+        os.environ["OPENAI_API_KEY"] = "dummy_key"  # Prevent OpenAI errors
+        
         Chatbot().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
 
     except Exception as e:
@@ -47,6 +55,9 @@ def replay():
     Replay the crew execution from a specific task.
     """
     try:
+        # Configure environment for crewAI
+        os.environ["OPENAI_API_KEY"] = "dummy_key"  # Prevent OpenAI errors
+        
         Chatbot().crew().replay(task_id=sys.argv[1])
 
     except Exception as e:
@@ -62,6 +73,9 @@ def test():
     }
     
     try:
+        # Configure environment for crewAI
+        os.environ["OPENAI_API_KEY"] = "dummy_key"  # Prevent OpenAI errors
+        
         Chatbot().crew().test(n_iterations=int(sys.argv[1]), eval_llm=sys.argv[2], inputs=inputs)
 
     except Exception as e:
