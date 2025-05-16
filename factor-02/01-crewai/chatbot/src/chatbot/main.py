@@ -1,17 +1,17 @@
+import base64
 import logging
 import os
 
-import openlit
 from dotenv import load_dotenv
+import openlit
 
 from chatbot.crew import Chatbot
 
 # Configure logging
-# log_level = logging.DEBUG if os.environ.get("DEVOPS_DEBUG", "").lower() in ["1", "true", "yes"] else logging.ERROR
-# logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+log_level = logging.DEBUG if os.environ.get("DEVOPS_DEBUG", "").lower() in ["1", "true", "yes"] else logging.WARNING
+logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 load_dotenv()
-
 
 # Initialize OpenLit OpenTelemetry instrumentation
 openlit.init()

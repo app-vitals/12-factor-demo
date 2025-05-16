@@ -16,18 +16,23 @@ Ensure you have Python >=3.10 <3.13 installed on your system. This project uses 
 ### Configuration
 
 Add your OpenAI API key to the `.env` file or set it as an environment variable:
+Add your OpenAI API key and langfuse OTEL endpoint to the `.env` file or set them as environment variables. The OpenAI API key is required for the assistant to function, and the langfuse OTEL endpoint is used for telemetry data collection.
 
-```
+Langfuse uses Basic Auth to authenticate requests.
+
+You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`. For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
+
 # Set in .env file
 OPENAI_API_KEY=your_openai_api_key_here
 MODEL=gpt-4.1  # or any other OpenAI model you prefer
 
-LANGFUSE_SECRET_KEY=<langfuse_secret_key>
-LANGFUSE_PUBLIC_KEY=<langfuse_public_key>
-LANGFUSE_HOST=<langfuse_host>
+OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
 
 # Or set as environment variable
 export OPENAI_API_KEY=your_openai_api_key_here
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
 ```
 
 > **Important**: Ensure your OpenAI account has sufficient quota for the model you're using. If you encounter a "RateLimitError: OpenAIException - You exceeded your current quota" error, you may need to:
