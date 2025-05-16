@@ -4,6 +4,7 @@ import warnings
 import os
 import argparse
 import logging
+import openlit
 
 # Fix import for both package mode and direct execution
 try:
@@ -17,6 +18,9 @@ logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelnam
 logger = logging.getLogger('devops_assistant_main')
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
+
+# Initialize OpenLit OpenTelemetry instrumentation
+openlit.init()
 
 def run():
     """
