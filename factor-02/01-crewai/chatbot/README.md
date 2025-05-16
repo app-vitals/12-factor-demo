@@ -13,33 +13,25 @@ Welcome to the DevOps Knowledge Assistant, powered by [crewAI](https://crewai.co
 
 Ensure you have Python >=3.10 <3.13 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling.
 
-For detailed installation instructions, see [INSTALL.md](INSTALL.md).
-
-Quick setup:
-
-```bash
-# Install dependencies (using uv)
-uv pip install -e .
-uv pip install crewai langchain-openai python-dotenv
-
-# Or using regular pip with virtualenv
-python -m venv .venv
-source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-pip install -e .
-pip install crewai langchain-openai python-dotenv
-```
-
 ### Configuration
 
-Add your OpenAI API key to the `.env` file or set it as an environment variable:
+Add your OpenAI API key and langfuse OTEL endpoint to the `.env` file or set them as environment variables. The OpenAI API key is required for the assistant to function, and the langfuse OTEL endpoint is used for telemetry data collection.
 
-```
+Langfuse uses Basic Auth to authenticate requests.
+
+You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`. For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
+
 # Set in .env file
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o  # or any other OpenAI model you prefer
+MODEL=gpt-4.1  # or any other OpenAI model you prefer
+
+OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
 
 # Or set as environment variable
 export OPENAI_API_KEY=your_openai_api_key_here
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING}"
 ```
 
 > **Important**: Ensure your OpenAI account has sufficient quota for the model you're using. If you encounter a "RateLimitError: OpenAIException - You exceeded your current quota" error, you may need to:
@@ -57,41 +49,8 @@ You can run the DevOps Knowledge Assistant in multiple ways:
 # Run with default question
 crewai run
 
-# Set a custom question via environment variable
-DEVOPS_QUESTION="What is Kubernetes?" crewai run
-
 # Enable debugging output
 DEVOPS_DEBUG=true crewai run
-```
-
-### Using the included run script
-
-```bash
-# Interactive mode
-python run_chatbot.py
-
-# Ask a single question
-python run_chatbot.py -q "What is blue-green deployment?"
-```
-
-### Using Python directly
-
-```bash
-# Interactive mode
-python -m src.chatbot.main
-
-# Ask a single question
-python -m src.chatbot.main -q "What is blue-green deployment?"
-```
-
-### If you've installed the package
-
-```bash
-# Using the devops-assistant command
-devops-assistant
-
-# Using the chatbot command
-chatbot
 ```
 
 ## Example Questions
@@ -116,15 +75,19 @@ You can:
 
 After modifying the knowledge base:
 
-1. Update the list of files in `src/chatbot/crew.py` for both agents:
+1. Update the list of files in `src/chatbot/crew.py`:
    ```python
-   knowledge_files = TextFileKnowledgeSource(
-       file_paths=[
-           "your-new-file.md",
-           "existing-file.md",
-           # Add or remove files as needed
+   @cached_property
+   def knowledge_sources(self) -> List[BaseKnowledgeSource]:
+       return [
+           TextFileKnowledgeSource(
+               file_paths=[
+                   "your-new-file.md",
+                   "existing-file.md",
+                   # Add or remove files as needed
+               ],
+           ),
        ]
-   )
    ```
 
 2. Use relative file paths (no leading slash), as these are relative to the `knowledge/` directory

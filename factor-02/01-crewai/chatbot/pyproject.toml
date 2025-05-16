@@ -5,17 +5,19 @@ description = "chatbot using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "crewai[tools]>=0.119.0,<1.0.0",
-    "langchain-openai>=0.1.1",
-    "python-dotenv>=1.0.0",
+    "chromadb==1.0.0",
+    "crewai>=0.120.1,<1.0.0",
     "langfuse>=0.1.0",
     "openlit>=0.1.0",
+    "python-dotenv>=1.1.0",
 ]
 
 [project.scripts]
-chatbot = "chatbot.main:process_command_line"
-devops-assistant = "chatbot.main:process_command_line"
+chatbot = "chatbot.main:run"
 run_crew = "chatbot.main:run"
+train = "chatbot.main:train"
+replay = "chatbot.main:replay"
+test = "chatbot.main:test"
 
 [build-system]
 requires = ["hatchling"]

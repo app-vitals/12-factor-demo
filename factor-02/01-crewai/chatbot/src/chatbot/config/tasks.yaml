@@ -6,7 +6,6 @@ research_query:
   expected_output: >
     Accurate findings from the knowledge base, especially markdown files, answering '{user_question}', including relevant details or steps. 
     If no specific answer exists, note the limitation.
-
   agent: knowledge_researcher
 
 formulate_answer:
