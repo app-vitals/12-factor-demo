@@ -15,6 +15,7 @@ class Chatbot():
 
     @cached_property
     def knowledge_sources(self) -> List[BaseKnowledgeSource]:
+        # Create text file knowledge source with relative paths from knowledge directory
         return [
             TextFileKnowledgeSource(
                 file_paths=[
