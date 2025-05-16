@@ -1,0 +1,17 @@
+research_query:
+  description: >
+    Search the knowledge base, including markdown files, to answer: '{user_question}'. 
+    Only return information from the knowledge sources. If the knowledge sources do not contain an answer, note the limitation.
+
+  expected_output: >
+    Accurate findings from the knowledge base, especially markdown files, answering '{user_question}', including relevant details or steps. 
+    If no specific answer exists, note the limitation.
+  agent: knowledge_researcher
+
+formulate_answer:
+  description: >
+    Using the research, provide a clear, concise answer to '{user_question}' as an experienced DevOps engineer. 
+    Only return information from the knowledge sources. If the knowledge sources do not contain an answer, note the limitation.
+  expected_output: >
+    A clear, concise, technically accurate answer to '{user_question}', reflecting details or steps from markdown files in the knowledge base. If no specific answer exists, note the limitation.
+  agent: devops_assistant

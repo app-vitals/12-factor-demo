@@ -70,3 +70,4 @@ tmp/
 temp/
 *.tmp
 *.bak
+**/.claude/settings.local.json
