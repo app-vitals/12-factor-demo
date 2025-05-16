@@ -15,7 +15,6 @@ Ensure you have Python >=3.10 <3.13 installed on your system. This project uses 
 
 ### Configuration
 
-Add your OpenAI API key to the `.env` file or set it as an environment variable:
 Add your OpenAI API key and langfuse OTEL endpoint to the `.env` file or set them as environment variables. The OpenAI API key is required for the assistant to function, and the langfuse OTEL endpoint is used for telemetry data collection.
 
 Langfuse uses Basic Auth to authenticate requests.
