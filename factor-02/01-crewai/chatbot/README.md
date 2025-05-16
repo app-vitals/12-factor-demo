@@ -85,12 +85,6 @@ After modifying the knowledge base:
                    "your-new-file.md",
                    "existing-file.md",
                    # Add or remove files as needed
-                   "code-review-guidelines.md",
-                   "blue-green-deployment.md",
-                   "error-rate-runbook.md",
-                   "kubernetes-cluster-setup.md",
-                   "database-outage.md",
-                   "argocd.md"
                ],
            ),
        ]
