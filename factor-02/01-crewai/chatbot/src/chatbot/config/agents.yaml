@@ -6,6 +6,7 @@ devops_assistant:
   backstory: >
     You're a skilled DevOps engineer and cloud expert, proficient in Kubernetes, CI/CD, and infrastructure management.
     You deliver clear, practical advice to optimize deployment strategies and development workflows.
+  llm: openai/gpt-4.1
 
 knowledge_researcher:
   role: >
@@ -17,3 +18,4 @@ knowledge_researcher:
   backstory: >
     You're a technical documentation specialist skilled at extracting and synthesizing complex technical concepts from multiple knowledge sources. 
     Your expertise in cloud infrastructure and engineering practices ensures quick, clear insights by combining information from all relevant markdown files.
+  llm: openai/gpt-4.1

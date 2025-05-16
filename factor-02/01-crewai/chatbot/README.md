@@ -13,22 +13,6 @@ Welcome to the DevOps Knowledge Assistant, powered by [crewAI](https://crewai.co
 
 Ensure you have Python >=3.10 <3.13 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling.
 
-For detailed installation instructions, see [INSTALL.md](INSTALL.md).
-
-Quick setup:
-
-```bash
-# Install dependencies (using uv)
-uv pip install -e .
-uv pip install crewai langchain-openai python-dotenv
-
-# Or using regular pip with virtualenv
-python -m venv .venv
-source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-pip install -e .
-pip install crewai langchain-openai python-dotenv
-```
-
 ### Configuration
 
 Add your OpenAI API key to the `.env` file or set it as an environment variable:
@@ -36,7 +20,11 @@ Add your OpenAI API key to the `.env` file or set it as an environment variable:
 ```
 # Set in .env file
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o  # or any other OpenAI model you prefer
+MODEL=gpt-4.1  # or any other OpenAI model you prefer
+
+LANGFUSE_SECRET_KEY=<langfuse_secret_key>
+LANGFUSE_PUBLIC_KEY=<langfuse_public_key>
+LANGFUSE_HOST=<langfuse_host>
 
 # Or set as environment variable
 export OPENAI_API_KEY=your_openai_api_key_here
@@ -57,41 +45,8 @@ You can run the DevOps Knowledge Assistant in multiple ways:
 # Run with default question
 crewai run
 
-# Set a custom question via environment variable
-DEVOPS_QUESTION="What is Kubernetes?" crewai run
-
 # Enable debugging output
 DEVOPS_DEBUG=true crewai run
-```
-
-### Using the included run script
-
-```bash
-# Interactive mode
-python run_chatbot.py
-
-# Ask a single question
-python run_chatbot.py -q "What is blue-green deployment?"
-```
-
-### Using Python directly
-
-```bash
-# Interactive mode
-python -m src.chatbot.main
-
-# Ask a single question
-python -m src.chatbot.main -q "What is blue-green deployment?"
-```
-
-### If you've installed the package
-
-```bash
-# Using the devops-assistant command
-devops-assistant
-
-# Using the chatbot command
-chatbot
 ```
 
 ## Example Questions
@@ -116,15 +71,25 @@ You can:
 
 After modifying the knowledge base:
 
-1. Update the list of files in `src/chatbot/crew.py` for both agents:
+1. Update the list of files in `src/chatbot/crew.py`:
    ```python
-   knowledge_files = TextFileKnowledgeSource(
-       file_paths=[
-           "your-new-file.md",
-           "existing-file.md",
-           # Add or remove files as needed
+   @cached_property
+   def knowledge_sources(self) -> List[BaseKnowledgeSource]:
+       return [
+           TextFileKnowledgeSource(
+               file_paths=[
+                   "your-new-file.md",
+                   "existing-file.md",
+                   # Add or remove files as needed
+                   "code-review-guidelines.md",
+                   "blue-green-deployment.md",
+                   "error-rate-runbook.md",
+                   "kubernetes-cluster-setup.md",
+                   "database-outage.md",
+                   "argocd.md"
+               ],
+           ),
        ]
-   )
    ```
 
 2. Use relative file paths (no leading slash), as these are relative to the `knowledge/` directory
