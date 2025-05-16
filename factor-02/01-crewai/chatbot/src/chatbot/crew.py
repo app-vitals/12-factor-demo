@@ -11,10 +11,6 @@ log_level = logging.DEBUG if os.environ.get("DEVOPS_DEBUG", "").lower() in ["1",
 logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('devops_assistant')
 
-# Log debug status
-if log_level == logging.DEBUG:
-    logger.debug("Debug logging enabled")
-
 # Fix import for both package mode and direct execution
 try:
     from chatbot.config.api_config import get_openai_llm  # When installed as a package
@@ -25,62 +21,42 @@ except ImportError:
 class Chatbot():
     """DevOps and Engineering Knowledge Assistant chatbot"""
 
-    agents: List[BaseAgent]
-    tasks: List[Task]
-    
+    # Define knowledge_files as a class-level attribute
+    knowledge_files = TextFileKnowledgeSource(
+        file_paths=[
+            "code-review-guidelines.md",
+            "blue-green-deployment.md",
+            "error-rate-runbook.md",
+            "kubernetes-cluster-setup.md",
+            "database-outage.md"
+        ]
+    )
+
     @agent
     def knowledge_researcher(self) -> Agent:
         """Create the knowledge researcher agent"""
-        # Create text file knowledge source with relative paths from knowledge directory
-        knowledge_files = TextFileKnowledgeSource(
-            file_paths=[
-                "code-review-guidelines.md",
-                "blue-green-deployment.md",
-                "error-rate-runbook.md",
-                "kubernetes-cluster-setup.md",
-                "database-outage.md",
-                "argocd.md"
-            ]
-        )
-        
-        # Log for debugging
-        logger.info("Created knowledge source for knowledge_researcher")
                 
         # Get OpenAI LLM
         openai_llm = get_openai_llm()
         
         return Agent(
-            config=self.agents_config['knowledge_researcher'], # type: ignore[index]
+            config=self.agents_config['knowledge_researcher'],  # type: ignore[index]
             verbose=True,
-            knowledge_sources=[knowledge_files],  # Pass the TextFileKnowledgeSource object
+            knowledge_sources=[self.knowledge_files],  # Use the class-level attribute
             llm=openai_llm
         )
 
     @agent
     def devops_assistant(self) -> Agent:
         """Create the DevOps assistant agent"""
-        # Create text file knowledge source with relative paths from knowledge directory
-        knowledge_files = TextFileKnowledgeSource(
-            file_paths=[
-                "code-review-guidelines.md",
-                "blue-green-deployment.md",
-                "error-rate-runbook.md",
-                "kubernetes-cluster-setup.md",
-                "database-outage.md",
-                "argocd.md"
-            ]
-        )
-        
-        # Log for debugging
-        logger.info("Created knowledge source for devops_assistant")
     
         # Get OpenAI LLM
         openai_llm = get_openai_llm()
         
         return Agent(
-            config=self.agents_config['devops_assistant'], # type: ignore[index]
+            config=self.agents_config['devops_assistant'],  # type: ignore[index]
             verbose=True,
-            knowledge_sources=[knowledge_files],  # Pass the TextFileKnowledgeSource object
+            knowledge_sources=[self.knowledge_files],  # Use the class-level attribute
             llm=openai_llm
         )
 
@@ -104,22 +80,11 @@ class Chatbot():
         # Get OpenAI LLM for the crew
         openai_llm = get_openai_llm()
 
-        knowledge_files = TextFileKnowledgeSource(
-            file_paths=[
-                "code-review-guidelines.md",
-                "blue-green-deployment.md",
-                "error-rate-runbook.md",
-                "kubernetes-cluster-setup.md",
-                "database-outage.md",
-                "argocd.md"
-            ]
-        )
-
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
-             knowledge_sources=[knowledge_files],
+            knowledge_sources=[self.knowledge_files],  # Use the class-level attribute
             verbose=True,
             llm=openai_llm
         )

@@ -5,13 +5,13 @@
 ### Immediate Actions (0-5 minutes)
 1. **Page on-call DBA** via PagerDuty
 2. **Check monitoring dashboards**:
-   - DataDog: Database cluster health
+   - DataDog: Database cluster health for app-vitals.com
    - New Relic: Connection pool status
    - Prometheus: Query latency metrics
 3. **Verify replication status**: `SELECT * FROM pg_stat_replication;`
 
 ### Investigation Steps
-1. **Check recent deployments** in #deployments Slack channel
+1. **Check recent deployments** in #deployments Slack channel for app-vitals.com
 2. **Review error logs**:
    - Location: `/var/log/postgresql/postgresql.log`
    - Common errors: Connection timeouts, lock waits, OOM kills
@@ -23,6 +23,6 @@
 - **Lock contention**: Identify blocking queries with `pg_blocking_pids()`
 
 ### Post-Incident
-- Update status page
+- Update status page for app-vitals.com
 - Schedule RCA meeting within 24h
 - Document lessons learned in `/docs/incidents/`

@@ -25,3 +25,9 @@ Common Operations
 Scale deployment: kubectl scale deployment api --replicas=5
 Check node resources: kubectl top nodes
 Drain node for maintenance: kubectl drain node-name --ignore-daemonsets
+```
+
+### Scaling
+- **Cluster Autoscaler**: Automatically adjusts the number of nodes in the cluster based on resource demands.
+- **Horizontal Pod Autoscaler (HPA)**: Adjusts the number of pod replicas based on CPU/memory utilization or custom metrics.
+- **Vertical Pod Autoscaler (VPA)**: Adjusts resource requests and limits for containers in a pod to optimize resource usage.

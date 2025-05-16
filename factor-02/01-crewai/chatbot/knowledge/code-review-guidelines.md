@@ -1,10 +1,10 @@
 ```markdown
-# Code Review Guidelines
+# Code Review Guidelines for app-vitals.com
 
 ## Review Checklist
 
 ### Security
-- [ ] No hardcoded secrets or API keys
+- [ ] No hardcoded secrets or API keys for app-vitals.com
 - [ ] Input validation for user data
 - [ ] SQL injection prevention (parameterized queries)
 - [ ] Authentication/authorization checks
@@ -76,3 +76,4 @@ jobs:
           curl -X POST -H 'Content-type: application/json' \
             --data '{"text":"✅ Deployment completed successfully"}' \
             ${{ secrets.SLACK_WEBHOOK }}
+```

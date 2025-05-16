@@ -1,7 +1,7 @@
-# Blue-Green Deployment Process
+# Blue-Green Deployment Process for app-vitals.com
 
 ## Overview
-Blue-green deployment is a technique for releasing applications with zero-downtime by maintaining two identical production environments called Blue and Green.
+Blue-green deployment is a technique for releasing applications with zero-downtime by maintaining two identical production environments called Blue and Green for app-vitals.com.
 
 ## How It Works
 1. **Blue** is the current live production environment
@@ -10,7 +10,7 @@ Blue-green deployment is a technique for releasing applications with zero-downti
 4. The old Blue environment remains available for quick rollback if needed
 
 ## Prerequisites
-- All tests passing in staging
+- All tests passing in staging for app-vitals.com
 - Database migrations completed
 - Rollback plan documented
 
@@ -22,7 +22,7 @@ Blue-green deployment is a technique for releasing applications with zero-downti
 ./deploy.sh --environment=green --version=$NEW_VERSION
 
 # Health check green environment
-curl -f https://green.api.company.com/health
+curl -f https://green.api.app-vitals.com/health
 ```
 
 ### 2. Route Traffic
@@ -48,7 +48,7 @@ aws elbv2 modify-target-group \
 ./scripts/rollback.sh --to-blue
 
 # Verify rollback
-curl -f https://api.company.com/health
+curl -f https://api.app-vitals.com/health
 ```
 
 ## Benefits
