@@ -422,20 +422,16 @@ name = "chatbot"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "chromadb" },
     { name = "crewai" },
     { name = "langfuse" },
     { name = "openlit" },
-    { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "chromadb", specifier = "==1.0.0" },
     { name = "crewai", specifier = ">=0.120.1,<1.0.0" },
     { name = "langfuse", specifier = ">=0.1.0" },
     { name = "openlit", specifier = ">=0.1.0" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
 ]
 
 [[package]]
