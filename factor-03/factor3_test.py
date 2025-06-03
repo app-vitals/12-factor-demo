@@ -15,9 +15,11 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 import litellm
+from langfuse.decorators import observe, langfuse_context
 
 litellm.success_callback = ["langfuse"]
 litellm.failure_callback = ["langfuse"]
+litellm.modify_params = True  # Allow LiteLLM to modify params for compatibility
 
 load_dotenv()
 
@@ -271,16 +273,12 @@ class Scenario:
                         break
         return tool_results
 
-# Latest model versions
+# Latest model versions - LiteLLM format
 MODELS = {
     "gpt-4.1": "gpt-4.1-2025-04-14",
-    "sonnet-4": "claude-sonnet-4-20250514",
-    "gemini-2.5": "gemini-2.5-pro-preview-05-06"
+    "sonnet-4": "claude-sonnet-4-20250514", 
+    "gemini-2.5": "gemini/gemini-2.5-pro-preview-05-06"  # Use gemini/ prefix for Google AI Studio
 }
-
-def estimate_tokens(text: str) -> int:
-    """Simple token estimation (roughly 4 chars per token)"""
-    return len(text) // 4
 
 def load_test_scenarios():
     """Load test scenarios from JSON file and convert to Scenario objects"""
@@ -289,44 +287,9 @@ def load_test_scenarios():
     return [Scenario.from_dict(item) for item in data]
 
 def format_standard(scenario: Scenario):
-    """Standard message format (baseline) - API-neutral conversation as simple text"""
-    user_request = scenario.get_user_request()
-    
-    # Convert OpenAI-style messages to API-neutral text format
-    conversation_parts = []
-    
-    for msg in scenario.standard_messages[1:-1]:  # Skip system and final user message
-        role = msg["role"]
-        content = msg["content"]
-        
-        if role == "user":
-            conversation_parts.append(f"User: {content}")
-        elif role == "assistant":
-            if "tool_calls" in msg and msg["tool_calls"]:
-                # Convert tool calls to natural language
-                text_content = content or ""
-                for tool_call in msg["tool_calls"]:
-                    func_name = tool_call["function"]["name"]
-                    func_args = tool_call["function"]["arguments"]
-                    text_content += f" [Called {func_name} with {func_args}]"
-                conversation_parts.append(f"Assistant: {text_content}")
-            else:
-                conversation_parts.append(f"Assistant: {content}")
-        elif role == "tool":
-            # Tool results as system information
-            conversation_parts.append(f"System returned: {content}")
-    
-    # Create simple conversation text
-    conversation_text = "\n\n".join(conversation_parts)
-    simple_content = f"""Previous conversation:
-{conversation_text}
-
-Current request: {user_request}"""
-    
-    return [
-        scenario.standard_messages[0],  # Keep original system message
-        {"role": "user", "content": simple_content}
-    ]
+    """Standard message format (baseline) - Original OpenAI conversation format"""
+    # LiteLLM should handle tool call format translation automatically
+    return scenario.standard_messages
 
 def format_xml_structured(scenario: Scenario):
     """XML structured format - Factor 3 single message with comprehensive context"""
@@ -428,8 +391,8 @@ def format_document_centric(scenario: Scenario):
         {"role": "user", "content": document_content}
     ]
 
-def format_json_conversation(scenario: Scenario):
-    """JSON conversation history - structured conversation with context metadata"""
+def format_markdown(scenario: Scenario):
+    """Markdown format - clean, readable structure using markdown syntax"""
     user_request = scenario.get_user_request()
     tool_results = scenario.get_tool_results()
     
@@ -440,66 +403,67 @@ def format_json_conversation(scenario: Scenario):
     conversation_entries = []
     for msg in scenario.standard_messages[1:-1]:
         if msg['role'] != 'tool':  # Skip tool messages, we'll include results separately
-            conversation_entries.append(f"{msg['role']}: {msg['content']}")
+            conversation_entries.append(f"**{msg['role'].title()}**: {msg['content']}")
     
     # Format recent changes
     changes_entries = []
     for change in scenario.project_context.recent_changes:
-        changes_entries.append(f"{change.get('version', 'unknown')}: {change.get('changes', 'no description')}")
+        changes_entries.append(f"- **{change.get('version', 'unknown')}**: {change.get('changes', 'no description')}")
     
     # Format tool results
     tool_entries = []
     for result in tool_results:
-        tool_entries.append(f"{result['function']}: {result['result']}")
+        tool_entries.append(f"- **{result['function']}**: {result['result']}")
     
-    json_content = f"""Context and request in structured format:
+    markdown_content = f"""# Context and Current Request
 
-USER PROFILE:
-  Name: {scenario.user_profile.name}
-  Role: {scenario.user_profile.role} ({scenario.user_profile.team} team)
-  Working style: {scenario.user_profile.preferences}
-  Expertise: {scenario.user_profile.specialization}
-  
-  Work history:
-{chr(10).join([f"    - {entry}" for entry in history_entries]) if history_entries else "    - No history available"}
+## User Profile
+- **Name**: {scenario.user_profile.name}
+- **Role**: {scenario.user_profile.role} ({scenario.user_profile.team} team)
+- **Working Style**: {scenario.user_profile.preferences}
+- **Expertise**: {scenario.user_profile.specialization}
 
-PROJECT CONTEXT:
-  Repository: {scenario.project_context.repo} (version {scenario.project_context.current_version})
-  Technology: {', '.join(scenario.project_context.tech_stack)}
-  
-  Infrastructure: {scenario.project_context.infrastructure.get("production", {}).get("instances", "unknown")} instances, {scenario.project_context.infrastructure.get("deployment_pattern", "unknown")} deployment
-  
-  Current status: {scenario.project_context.current_state.get("health_status", "unknown")} system with {scenario.project_context.current_state.get("active_alerts", "unknown")} alerts
-  
-  Requirements: {scenario.project_context.requirements.get("uptime_sla", "unknown")} uptime, {scenario.project_context.requirements.get("performance_sla", "unknown")} performance
-  
-  Recent changes:
-{chr(10).join([f"    - {entry}" for entry in changes_entries]) if changes_entries else "    - No recent changes"}
+### Work History
+{chr(10).join([f"- {entry}" for entry in history_entries]) if history_entries else "- No history available"}
 
-CONVERSATION HISTORY:
-{chr(10).join([f"  {entry}" for entry in conversation_entries]) if conversation_entries else "  - No prior conversation"}
+## Project Context
+- **Repository**: {scenario.project_context.repo} (version {scenario.project_context.current_version})
+- **Technology Stack**: {', '.join(scenario.project_context.tech_stack)}
+- **Infrastructure**: {scenario.project_context.infrastructure.get("production", {}).get("instances", "unknown")} instances, {scenario.project_context.infrastructure.get("deployment_pattern", "unknown")} deployment
+- **Current Status**: {scenario.project_context.current_state.get("health_status", "unknown")} system with {scenario.project_context.current_state.get("active_alerts", "unknown")} alerts
+- **Requirements**: {scenario.project_context.requirements.get("uptime_sla", "unknown")} uptime, {scenario.project_context.requirements.get("performance_sla", "unknown")} performance
 
-TOOL RESULTS:
-{chr(10).join([f"  {entry}" for entry in tool_entries]) if tool_entries else "  - No tool results"}
+### Recent Changes
+{chr(10).join(changes_entries) if changes_entries else "- No recent changes"}
 
-CURRENT REQUEST:
-  {user_request}"""
+## Conversation History
+{chr(10).join(conversation_entries) if conversation_entries else "- No prior conversation"}
+
+## Tool Results
+{chr(10).join(tool_entries) if tool_entries else "- No tool results"}
+
+## Current Request
+{user_request}"""
     
     return [
         scenario.standard_messages[0],  # Keep original system message
-        {"role": "user", "content": json_content}
+        {"role": "user", "content": markdown_content}
     ]
 
-def test_openai(messages, model="gpt-4"):
-    """Test with OpenAI API"""
-    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def test_model(messages, model):
+    """Test with any model via LiteLLM unified interface"""
     start_time = time.time()
     
-    response = client.chat.completions.create(
+    response = litellm.completion(
         model=model,
         messages=messages,
         max_tokens=16384,
-        temperature=0.1
+        temperature=0.1,
+        metadata={
+            # Nest LiteLLM calls under current Langfuse trace
+            "existing_trace_id": langfuse_context.get_current_trace_id(),
+            "parent_observation_id": langfuse_context.get_current_observation_id(),
+        },
     )
     
     end_time = time.time()
@@ -510,91 +474,42 @@ def test_openai(messages, model="gpt-4"):
         "output_tokens": response.usage.completion_tokens,
         "total_tokens": response.usage.total_tokens,
         "time": end_time - start_time,
-        # GPT-4.1: $2.00 input / $8.00 output per 1M tokens
-        # Source: https://openai.com/api/pricing/
-        "cost": (response.usage.prompt_tokens * 2.00 + response.usage.completion_tokens * 8.00) / 1000000
+        # LiteLLM automatically calculates accurate costs
+        "cost": litellm.completion_cost(completion_response=response)
     }
 
-def test_anthropic(messages, model="claude-3-5-sonnet-20241022"):
-    """Test with Anthropic API"""
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    start_time = time.time()
+@observe(name="factor3_model_test")
+def test_model_and_evaluate(messages, model_key, model_name, model_id, scenario, format_name):
+    """Test a model and evaluate response quality - captured as single Langfuse trace"""
+    print(f"\n🤖 Testing {model_name}...")
     
-    # Convert to Anthropic format - filter out tool messages
-    system_msg = ""
-    user_messages = []
+    # Test the model
+    result = test_model(messages, model_id)
     
-    for msg in messages:
-        if msg["role"] == "system":
-            system_msg = msg["content"]
-        elif msg["role"] in ["user", "assistant"]:  # Only allow user/assistant for Anthropic
-            user_messages.append(msg)
-        # Skip tool messages as Anthropic doesn't support them in this format
+    # Evaluate response quality
+    print(f"📊 Evaluating with GPT-4.1, Sonnet 4, Gemini 2.5...")
+    quality = evaluate_response_quality(result['response'], scenario)
+    result['quality'] = quality
     
-    response = client.messages.create(
-        model=model,
-        system=system_msg,
-        messages=user_messages,
-        max_tokens=16384,
-        temperature=0.1
+    # Print results
+    print(f"✅ Success: {result['total_tokens']} tokens, ${result['cost']:.6f}, {result['time']:.2f}s")
+    print(f"   Quality Score: {quality['overall']:.2f} (Spec: {quality.get('specificity', 0):.2f}, Pers: {quality.get('personalization', 0):.2f}, Action: {quality.get('actionability', 0):.2f}, Context: {quality.get('context_utilization', 0):.2f})")
+    
+    # Log additional metadata to current trace
+    langfuse_context.update_current_trace(
+        metadata={
+            "scenario": scenario.name,
+            "format": format_name,
+            "model": model_name,
+            "model_id": model_id,
+            "total_tokens": result['total_tokens'],
+            "cost": result['cost'],
+            "quality_overall": quality['overall'],
+            "quality_scores": quality
+        }
     )
     
-    end_time = time.time()
-    
-    return {
-        "response": response.content[0].text,
-        "input_tokens": response.usage.input_tokens,
-        "output_tokens": response.usage.output_tokens,
-        "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
-        "time": end_time - start_time,
-        # Claude Sonnet 4: $3.00 input / $15.00 output per 1M tokens
-        # Source: https://docs.anthropic.com/en/docs/about-claude/models
-        "cost": (response.usage.input_tokens * 3.00 + response.usage.output_tokens * 15.00) / 1000000
-    }
-
-def test_gemini(messages, model="gemini-1.5-pro"):
-    """Test with Gemini API"""
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    model_instance = genai.GenerativeModel(model)
-    start_time = time.time()
-    
-    # Convert to Gemini format
-    prompt_parts = []
-    for msg in messages:
-        role = msg["role"]
-        content = msg["content"]
-        if role == "system":
-            prompt_parts.append(f"System: {content}")
-        elif role == "user":
-            prompt_parts.append(f"User: {content}")
-        elif role == "assistant":
-            prompt_parts.append(f"Assistant: {content}")
-    
-    prompt = "\n\n".join(prompt_parts)
-    
-    response = model_instance.generate_content(
-        prompt,
-        generation_config=genai.types.GenerationConfig(
-            max_output_tokens=16384,
-            temperature=0.1
-        )
-    )
-    
-    end_time = time.time()
-
-    input_tokens = response.usage_metadata.prompt_token_count
-    output_tokens = response.usage_metadata.candidates_token_count
-    
-    return {
-        "response": response.text,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "total_tokens": input_tokens + output_tokens,
-        "time": end_time - start_time,
-        # Gemini 2.5 Pro: $1.25 input / $10.00 output per 1M tokens
-        # Source: https://ai.google.dev/pricing
-        "cost": (input_tokens * 1.25 + output_tokens * 10.00) / 1000000
-    }
+    return result
 
 def run_test(format_name, format_func, scenario):
     """Run test for a specific format across all models"""
@@ -605,35 +520,16 @@ def run_test(format_name, format_func, scenario):
     messages = format_func(scenario)
     results = {}
     
-    # Test GPT-4.1
-    print(f"\n🤖 Testing GPT-4.1...")
-    result = test_openai(messages, MODELS["gpt-4.1"])
-    print(f"📊 Evaluating with GPT-4.1, Sonnet 4, Gemini 2.5...")
-    quality = evaluate_response_quality(result['response'], scenario)
-    result['quality'] = quality
-    results["gpt-4.1"] = result
-    print(f"✅ Success: {result['total_tokens']} tokens, ${result['cost']:.6f}, {result['time']:.2f}s")
-    print(f"   Quality Score: {quality['overall']:.2f} (Spec: {quality.get('specificity', 0):.2f}, Pers: {quality.get('personalization', 0):.2f}, Action: {quality.get('actionability', 0):.2f}, Context: {quality.get('context_utilization', 0):.2f})")
+    # Test all models using unified interface
+    model_configs = [
+        ("gpt-4.1", "GPT-4.1", MODELS["gpt-4.1"]),
+        ("sonnet-4", "Sonnet 4", MODELS["sonnet-4"]),
+        ("gemini-2.5", "Gemini 2.5", MODELS["gemini-2.5"])
+    ]
     
-    # Test Sonnet 4
-    print(f"\n🤖 Testing Sonnet 4...")
-    result = test_anthropic(messages, MODELS["sonnet-4"])
-    print(f"📊 Evaluating with GPT-4.1, Sonnet 4, Gemini 2.5...")
-    quality = evaluate_response_quality(result['response'], scenario)
-    result['quality'] = quality
-    results["sonnet-4"] = result
-    print(f"✅ Success: {result['total_tokens']} tokens, ${result['cost']:.6f}, {result['time']:.2f}s")
-    print(f"   Quality Score: {quality['overall']:.2f} (Spec: {quality['specificity']:.2f}, Pers: {quality['personalization']:.2f}, Action: {quality['actionability']:.2f}, Context: {quality['context_utilization']:.2f})")
-    
-    # Test Gemini 2.5
-    print(f"\n🤖 Testing Gemini 2.5...")
-    result = test_gemini(messages, MODELS["gemini-2.5"])
-    print(f"📊 Evaluating with GPT-4.1, Sonnet 4, Gemini 2.5...")
-    quality = evaluate_response_quality(result['response'], scenario)
-    result['quality'] = quality
-    results["gemini-2.5"] = result
-    print(f"✅ Success: {result['total_tokens']} tokens, ${result['cost']:.6f}, {result['time']:.2f}s")
-    print(f"   Quality Score: {quality['overall']:.2f} (Spec: {quality['specificity']:.2f}, Pers: {quality['personalization']:.2f}, Action: {quality['actionability']:.2f}, Context: {quality['context_utilization']:.2f})")
+    for model_key, model_name, model_id in model_configs:
+        result = test_model_and_evaluate(messages, model_key, model_name, model_id, scenario, format_name)
+        results[model_key] = result
     
     return results
 
@@ -695,23 +591,18 @@ Format: specificity:0.X personalization:0.X actionability:0.X context_utilizatio
 
 Only output the scores, nothing else."""
 
-    # Use same models as testing for evaluation
+    # Use all three models for evaluation
+    evaluation_models = [
+        MODELS["gpt-4.1"],
+        MODELS["sonnet-4"],
+        MODELS["gemini-2.5"]
+    ]
+    
     all_scores = []
-    
-    # GPT-4.1 evaluation
-    gpt_result = test_openai([{"role": "user", "content": evaluation_prompt}], MODELS["gpt-4.1"])
-    gpt_scores = _parse_evaluation_scores(gpt_result['response'])
-    all_scores.append(gpt_scores)
-    
-    # Sonnet 4 evaluation  
-    sonnet_result = test_anthropic([{"role": "user", "content": evaluation_prompt}], MODELS["sonnet-4"])
-    sonnet_scores = _parse_evaluation_scores(sonnet_result['response'])
-    all_scores.append(sonnet_scores)
-    
-    # Gemini 2.5 evaluation
-    gemini_result = test_gemini([{"role": "user", "content": evaluation_prompt}], MODELS["gemini-2.5"])
-    gemini_scores = _parse_evaluation_scores(gemini_result['response'])
-    all_scores.append(gemini_scores)
+    for eval_model in evaluation_models:
+        result = test_model([{"role": "user", "content": evaluation_prompt}], eval_model)
+        scores = _parse_evaluation_scores(result['response'])
+        all_scores.append(scores)
     
     # Average scores across all three models
     averaged_scores = {}
@@ -722,6 +613,124 @@ Only output the scores, nothing else."""
         averaged_scores[key] = sum(scores_for_key) / len(scores_for_key)
     
     return averaged_scores
+
+def analyze_results_by_models(results_data, model_filter=None):
+    """Analyze results with optional model filtering"""
+    if model_filter is None:
+        model_filter = ["gpt-4.1", "sonnet-4", "gemini-2.5"]
+    
+    print(f"\n🔍 ANALYSIS WITH MODELS: {', '.join(model_filter)}")
+    print("-" * 60)
+    
+    # Aggregate results by format across all scenarios with model filtering
+    format_aggregates = {}
+    
+    for scenario_name, scenario_results in results_data.items():
+        for format_name, format_results in scenario_results.items():
+            if format_name not in format_aggregates:
+                format_aggregates[format_name] = {'quality_scores': [], 'token_counts': [], 'costs': []}
+                
+            for model_name, result in format_results.items():
+                if model_name in model_filter:
+                    quality_score = result.get('quality', {}).get('overall', 0)
+                    format_aggregates[format_name]['quality_scores'].append(quality_score)
+                    format_aggregates[format_name]['token_counts'].append(result['total_tokens'])
+                    format_aggregates[format_name]['costs'].append(result['cost'])
+    
+    # Calculate statistical summary
+    quality_by_format = {}
+    for format_name, data in format_aggregates.items():
+        if data['quality_scores']:
+            quality_by_format[format_name] = {
+                'avg_quality': sum(data['quality_scores']) / len(data['quality_scores']),
+                'avg_tokens': sum(data['token_counts']) / len(data['token_counts']),
+                'avg_cost': sum(data['costs']) / len(data['costs']),
+                'sample_size': len(data['quality_scores'])
+            }
+    
+    # Sort by quality
+    sorted_formats = sorted(quality_by_format.items(), key=lambda x: x[1]['avg_quality'], reverse=True)
+    
+    for format_name, stats in sorted_formats:
+        print(f"{format_name:<25} Quality: {stats['avg_quality']:.3f} | Tokens: {stats['avg_tokens']:.0f} | Cost: ${stats['avg_cost']:.5f} | n={stats['sample_size']}")
+    
+    # Calculate improvement statistics
+    if len(quality_by_format) >= 2:
+        quality_values = [stats['avg_quality'] for stats in quality_by_format.values()]
+        best_quality = max(quality_values)
+        worst_quality = min(quality_values)
+        improvement = ((best_quality - worst_quality) / worst_quality) * 100 if worst_quality > 0 else 0
+        
+        # Cost-benefit analysis
+        best_format = sorted_formats[0][0] 
+        worst_format = sorted_formats[-1][0]
+        best_cost = quality_by_format[best_format]['avg_cost']
+        worst_cost = quality_by_format[worst_format]['avg_cost']
+        cost_multiplier = best_cost / worst_cost if worst_cost > 0 else 1
+        
+        print(f"\n📊 RESULTS WITH {', '.join(model_filter).upper()}:")
+        print(f"   Quality improvement: {improvement:.1f}%")
+        print(f"   Cost increase: {(cost_multiplier - 1) * 100:.1f}%")
+        print(f"   Quality/Cost ratio: {improvement / ((cost_multiplier - 1) * 100) if cost_multiplier > 1 else float('inf'):.2f}")
+        
+        return {
+            'quality_improvement': improvement,
+            'cost_increase': (cost_multiplier - 1) * 100,
+            'quality_cost_ratio': improvement / ((cost_multiplier - 1) * 100) if cost_multiplier > 1 else float('inf'),
+            'best_quality': best_quality,
+            'worst_quality': worst_quality,
+            'sample_size': sum(stats['sample_size'] for stats in quality_by_format.values())
+        }
+    
+    return None
+
+def load_and_analyze_results(filename):
+    """Load existing results and analyze with different model combinations"""
+    with open(filename, 'r') as f:
+        results_data = json.load(f)
+    
+    print("🔬 COMPARATIVE MODEL ANALYSIS")
+    print("=" * 80)
+    
+    # All models
+    all_models_stats = analyze_results_by_models(results_data, ["gpt-4.1", "sonnet-4", "gemini-2.5"])
+    
+    # Without Gemini (no reasoning tokens)
+    no_gemini_stats = analyze_results_by_models(results_data, ["gpt-4.1", "sonnet-4"])
+    
+    # Only Gemini
+    only_gemini_stats = analyze_results_by_models(results_data, ["gemini-2.5"])
+    
+    # Only GPT-4.1
+    only_gpt_stats = analyze_results_by_models(results_data, ["gpt-4.1"])
+    
+    # Only Sonnet 4
+    only_sonnet_stats = analyze_results_by_models(results_data, ["sonnet-4"])
+    
+    print(f"\n🏆 SUMMARY COMPARISON:")
+    print(f"{'Model Combination':<20} {'Quality Gain':<12} {'Cost Increase':<14} {'Value Ratio':<12}")
+    print("-" * 60)
+    
+    if all_models_stats:
+        print(f"{'All Models':<20} {all_models_stats['quality_improvement']:<12.1f}% {all_models_stats['cost_increase']:<14.1f}% {all_models_stats['quality_cost_ratio']:<12.2f}")
+    
+    if no_gemini_stats:
+        print(f"{'GPT-4.1 + Sonnet':<20} {no_gemini_stats['quality_improvement']:<12.1f}% {no_gemini_stats['cost_increase']:<14.1f}% {no_gemini_stats['quality_cost_ratio']:<12.2f}")
+    
+    if only_gemini_stats:
+        print(f"{'Gemini Only':<20} {only_gemini_stats['quality_improvement']:<12.1f}% {only_gemini_stats['cost_increase']:<14.1f}% {only_gemini_stats['quality_cost_ratio']:<12.2f}")
+    
+    if only_gpt_stats:
+        print(f"{'GPT-4.1 Only':<20} {only_gpt_stats['quality_improvement']:<12.1f}% {only_gpt_stats['cost_increase']:<14.1f}% {only_gpt_stats['quality_cost_ratio']:<12.2f}")
+    
+    if only_sonnet_stats:
+        print(f"{'Sonnet 4 Only':<20} {only_sonnet_stats['quality_improvement']:<12.1f}% {only_sonnet_stats['cost_increase']:<14.1f}% {only_sonnet_stats['quality_cost_ratio']:<12.2f}")
+    
+    print(f"\n💡 INSIGHT: Gemini's reasoning tokens impact cost analysis")
+    if no_gemini_stats and all_models_stats:
+        cost_diff = all_models_stats['cost_increase'] - no_gemini_stats['cost_increase']
+        print(f"   Cost difference with/without Gemini: {cost_diff:.1f} percentage points")
+        print(f"   Cleaner cost analysis excludes reasoning token overhead")
 
 def main():
     """Run the Factor 3 quality comparison test"""
@@ -749,7 +758,7 @@ def main():
         ("XML Structured (Factor 3)", format_xml_structured),
         ("Document-Centric (Factor 3)", format_document_centric),
         ("Compressed (Factor 3)", format_compressed),
-        ("JSON Conversation (Factor 3)", format_json_conversation)
+        ("Markdown (Factor 3)", format_markdown)
     ]
     
     all_results = {}
@@ -772,6 +781,13 @@ def main():
             test_count += len(results)
         
         all_results[scenario.name] = scenario_results
+    
+    # Save results
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"factor3_results_{timestamp}.json"
+    
+    with open(filename, 'w') as f:
+        json.dump(all_results, f, indent=2)
     
     # Summary across all scenarios
     print(f"\n{'='*80}")
@@ -864,15 +880,11 @@ def main():
         else:
             print("❌ Poor value: Cost increase may not justify quality improvement")
     
-    # Save results
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"factor3_results_{timestamp}.json"
-    
-    with open(filename, 'w') as f:
-        json.dump(all_results, f, indent=2)
-    
     print(f"\n💾 Results saved to: {filename}")
     print("\n🎬 Perfect for video demonstration!")
+    
+    # Run model comparison analysis on saved results
+    analyze_results_by_models(all_results)
 
 if __name__ == "__main__":
     main()
