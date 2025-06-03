@@ -1,0 +1,6 @@
+anthropic
+google-generativeai
+langfuse
+litellm
+openai
+python-dotenv
