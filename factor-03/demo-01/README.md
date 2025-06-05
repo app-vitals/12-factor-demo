@@ -1,15 +1,18 @@
 # LLM Token and Cost Calculator
 
-A utility for calculating token counts and costs for OpenAI models using the tokencost library.
+A utility for calculating token counts and costs for multiple LLM models using the tokencost library.
 
 ## Features
 
-- Calculate token counts and costs for prompts
+- Calculate token counts and costs for prompts across all models simultaneously
 - Calculate token counts and costs for completions
 - Calculate total cost for a conversation (prompt + completion)
-- Support for OpenAI models:
+- Automatic cost calculation for all supported models in one operation
+- Support for multiple models:
   - GPT-3.5-Turbo
   - GPT-4o
+  - GPT-4 Turbo (gpt-4-1106-preview)
+  - Claude/Anthropic o1-mini (estimated using GPT-3.5-Turbo as fallback)
 
 ## How to Install and Run
 
@@ -88,12 +91,24 @@ Total Cost (USD): $0.000204
 You can also use the functions directly in your own code:
 
 ```python
-from llm_context import ModelChoice, calculate_prompt_tokens_and_cost
+from llm_context import calculate_costs_for_all_models
 
-# Calculate tokens and cost for a prompt
-result = calculate_prompt_tokens_and_cost(ModelChoice.CLAUDE_3_7_SONNET, "What is the capital of France?")
-print(f"Tokens: {result['tokens']}")
-print(f"Cost: ${result['cost_usd']:.6f}")
+# Calculate tokens and cost for a prompt across all models
+results = calculate_costs_for_all_models("What is the capital of France?")
+for result in results:
+    print(f"Model: {result['model_display_name']}")
+    print(f"Tokens: {result['tokens']}")
+    print(f"Cost: ${result['cost_usd']:.6f}")
+
+# Calculate total cost for a conversation (prompt + completion) across all models
+conversation_results = calculate_costs_for_all_models(
+    "What is the capital of France?", 
+    "The capital of France is Paris."
+)
+for result in conversation_results:
+    print(f"Model: {result['model_display_name']}")
+    print(f"Total Tokens: {result['total_tokens']}")
+    print(f"Total Cost: ${result['total_cost_usd']:.6f}")
 ```
 
 ## License
