@@ -1,0 +1,616 @@
+[
+  {
+    "name": "Deployment Scenario",
+    "standard_messages": [
+      {"role": "system", "content": "You are a deployment assistant. When responding: 1) Be specific - reference exact versions, infrastructure details, and timelines, 2) Personalize - address users by name/role and adapt to their preferences and team context, 3) Be actionable - provide concrete next steps and specific processes, 4) Use context - incorporate tool results, SLA requirements, historical data, and all available information to inform your recommendations."},
+      {"role": "user", "content": "Hey, I was looking at the commit history and noticed we have some new features in v1.2.3"},
+      {"role": "assistant", "content": "Yes, v1.2.3 includes the new payment processing module and some performance optimizations. Let me check the current deployment status first.", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "check_deployment_status", "arguments": "{\"environment\": \"production\"}"}}]},
+      {"role": "tool", "content": "{\"environment\": \"production\", \"current_version\": \"v1.2.2\", \"status\": \"healthy\", \"instances\": 6, \"last_deployed\": \"2024-01-15T10:30:00Z\", \"uptime\": \"99.9%\"}", "tool_call_id": "call_1"},
+      {"role": "assistant", "content": "Great! Production is currently running v1.2.2 and is healthy. Are you planning to deploy v1.2.3?"},
+      {"role": "user", "content": "Exactly. The product team is asking when we can get the new payment features live. What's our usual process?"},
+      {"role": "assistant", "content": "For production deployments, we typically start with staging validation. Let me check if v1.2.3 has been tested in staging.", "tool_calls": [{"id": "call_2", "type": "function", "function": {"name": "check_deployment_status", "arguments": "{\"environment\": \"staging\"}"}}]},
+      {"role": "tool", "content": "{\"environment\": \"staging\", \"current_version\": \"v1.2.3\", \"status\": \"healthy\", \"instances\": 2, \"last_deployed\": \"2024-01-16T09:15:00Z\", \"test_results\": \"passed\", \"uptime\": \"100%\"}", "tool_call_id": "call_2"},
+      {"role": "assistant", "content": "Perfect! v1.2.3 is already deployed to staging and all tests are passing. Now let me check our deployment pipeline status.", "tool_calls": [{"id": "call_3", "type": "function", "function": {"name": "get_pipeline_status", "arguments": "{\"version\": \"v1.2.3\"}"}}]},
+      {"role": "tool", "content": "{\"version\": \"v1.2.3\", \"build_status\": \"success\", \"security_scan\": \"passed\", \"performance_tests\": \"passed\", \"approval_status\": \"pending\", \"required_approvals\": [\"security-team\", \"platform-lead\"]}", "tool_call_id": "call_3"},
+      {"role": "assistant", "content": "The build and tests look good, but we need approvals from security-team and platform-lead before deploying to production. For a blue-green deployment, we typically do this: 1) Get required approvals, 2) Deploy to green environment, 3) Run smoke tests, 4) Switch traffic gradually. Would you like me to walk through the steps?"},
+      {"role": "user", "content": "Yes, but I need to deploy version v1.2.3 of our backend to production today. What should I do?"}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific deployment version (v1.2.3)",
+        "Mentions user's blue-green deployment preference",
+        "Acknowledges previous rollback incident with v1.2.1",
+        "References current system health status",
+        "Includes specific deployment timeline and approval requirements",
+        "Mentions infrastructure details (6 instances, regions)"
+      ],
+      "personalization": [
+        "Addresses Alex by name and role (Senior DevOps Engineer)",
+        "Adapts to user's 'paranoid about rollbacks' preference",
+        "References user's preference for 'testing staging first'",
+        "Acknowledges user's Kubernetes deployment expertise",
+        "Considers user's team context (Platform Engineering)"
+      ],
+      "actionability": [
+        "Provides specific next steps for deployment approval",
+        "Offers concrete blue-green deployment process",
+        "Suggests specific validation steps based on staging results",
+        "Recommends timeline based on business hours requirement",
+        "Provides rollback plan given user's concerns"
+      ],
+      "context_utilization": [
+        "Uses tool results showing current prod/staging status",
+        "References pending approvals from pipeline status",
+        "Incorporates uptime SLA requirements (99.9%)",
+        "Mentions degraded notification-service dependency",
+        "Uses historical deployment data for risk assessment"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Alex Chen",
+        "role": "Senior DevOps Engineer",
+        "team": "Platform Engineering",
+        "preferences": "always tests staging first, prefers blue-green deployments, paranoid about rollbacks",
+        "specialization": "Kubernetes deployments, zero-downtime releases",
+        "history": [
+          {"type": "deployment", "version": "v1.2.2", "date": "2024-01-15", "result": "success", "duration": "3m", "notes": "zero customer impact"},
+          {"type": "deployment", "version": "v1.2.1", "date": "2024-01-08", "result": "rollback", "duration": "15m", "notes": "payment service timeout"},
+          {"type": "deployment", "version": "v1.2.0", "date": "2024-01-01", "result": "success", "duration": "5m", "notes": "minor frontend cache issue"}
+        ]
+      },
+      "project_context": {
+        "repo": "ecommerce-backend",
+        "tech_stack": ["Node.js 18", "PostgreSQL 14", "Docker", "Kubernetes 1.28", "Redis 7", "Nginx"],
+        "current_version": "v1.2.2",
+        "infrastructure": {
+          "production": {"instances": 6, "regions": ["us-east-1", "us-west-2"], "type": "c5.xlarge"},
+          "staging": {"instances": 2, "regions": ["us-east-1"], "type": "c5.large"},
+          "monitoring": ["Datadog", "PagerDuty", "CloudWatch"],
+          "deployment_pattern": "blue-green"
+        },
+        "current_state": {
+          "health_status": "healthy",
+          "active_alerts": 0,
+          "dependencies": [
+            {"service": "payment-service", "version": "v2.1.0", "status": "healthy"},
+            {"service": "user-service", "version": "v1.8.2", "status": "healthy"},
+            {"service": "notification-service", "version": "v1.4.1", "status": "degraded"}
+          ]
+        },
+        "requirements": {
+          "deployment_window": "business hours only",
+          "rollback_time": "< 5 minutes",
+          "uptime_sla": "99.9%"
+        },
+        "recent_changes": [
+          {"version": "v1.2.3", "changes": "Added Stripe payment processing, optimized database queries"},
+          {"version": "v1.2.2", "changes": "Fixed memory leak in user session management"},
+          {"version": "v1.2.1", "changes": "Updated authentication middleware (caused rollback)"}
+        ]
+      }
+    }
+  },
+  {
+    "name": "Database Migration Scenario",
+    "standard_messages": [
+      {"role": "system", "content": "You are a database consultant. When responding: 1) Be specific - reference exact query performance metrics, database versions, and optimization techniques, 2) Personalize - address users by name/role and adapt to their database expertise and team context, 3) Be actionable - provide concrete optimization steps and specific database commands, 4) Use context - incorporate query analysis results, performance data, historical patterns, and all available information to inform your recommendations."},
+      {"role": "user", "content": "Sarah here. I've been reviewing our database architecture and we have a problem"},
+      {"role": "assistant", "content": "Hi Sarah! Let me check the current database state first to understand what we're working with.", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "analyze_database_schema", "arguments": "{\"database\": \"user-service\", \"include_stats\": true}"}}]},
+      {"role": "tool", "content": "{\"database\": \"user-service\", \"total_tables\": 8, \"largest_table\": \"users\", \"row_counts\": {\"users\": 2300000, \"user_profiles\": 2300000, \"organizations\": 15000, \"subscriptions\": 890000}, \"constraints\": {\"foreign_keys\": 23, \"indexes\": 45}, \"current_load\": {\"cpu\": \"65%\", \"memory\": \"78%\", \"connections\": 347}, \"schema_type\": \"single-tenant\"}", "tool_call_id": "call_1"},
+      {"role": "assistant", "content": "I can see we're dealing with a substantial single-tenant setup - 2.3M users with significant current load. What kind of problem are you seeing specifically?"},
+      {"role": "user", "content": "We're onboarding some major enterprise clients next month, and they're requiring full data isolation. Our current single-tenant setup won't work."},
+      {"role": "assistant", "content": "Ah, you need multi-tenancy. Let me analyze the dependencies and constraints to understand the migration complexity.", "tool_calls": [{"id": "call_2", "type": "function", "function": {"name": "analyze_schema_dependencies", "arguments": "{\"database\": \"user-service\", \"migration_type\": \"multi-tenant\"}"}}]},
+      {"role": "tool", "content": "{\"complex_dependencies\": 12, \"circular_references\": 3, \"migration_challenges\": [\"users.organization_id foreign key\", \"subscription billing references\", \"audit log partitioning\"], \"estimated_complexity\": \"high\", \"breaking_changes\": 8, \"data_consistency_risks\": [\"orphaned records\", \"constraint violations\", \"sequence conflicts\"]}", "tool_call_id": "call_2"},
+      {"role": "assistant", "content": "This is indeed complex - 12 dependencies with circular references. Have you considered the different approaches - shared database with tenant ID, separate schemas, or separate databases?"},
+      {"role": "user", "content": "I'm leaning toward separate schemas for data isolation but shared infrastructure for cost efficiency. The challenge is we have 2.3 million existing user records."},
+      {"role": "assistant", "content": "Separate schemas is a good approach for your requirements. Let me create a migration plan for that volume of data.", "tool_calls": [{"id": "call_3", "type": "function", "function": {"name": "create_migration_plan", "arguments": "{\"approach\": \"separate_schemas\", \"record_count\": 2300000, \"downtime_tolerance\": \"minimal\"}"}}]},
+      {"role": "tool", "content": "{\"migration_strategy\": \"incremental_with_dual_write\", \"phases\": 4, \"estimated_duration\": \"72_hours\", \"downtime_required\": \"15_minutes\", \"batch_size\": 50000, \"validation_checkpoints\": 8, \"rollback_points\": 4, \"resource_requirements\": {\"additional_storage\": \"500GB\", \"cpu_overhead\": \"25%\"}}", "tool_call_id": "call_3"},
+      {"role": "assistant", "content": "The plan shows 72 hours total with only 15 minutes downtime using incremental migration with dual-write. Let me check what your timeline constraints are and if this fits.", "tool_calls": [{"id": "call_4", "type": "function", "function": {"name": "validate_migration_timeline", "arguments": "{\"target_date\": \"2024-03-01\", \"preparation_time\": \"6_weeks\"}"}}]},
+      {"role": "tool", "content": "{\"timeline_feasible\": true, \"preparation_weeks\": 6, \"testing_phase\": \"2_weeks\", \"execution_window\": \"2024-02-24_to_2024-02-26\", \"risk_level\": \"medium\", \"contingency_buffer\": \"1_week\", \"client_onboarding\": {\"MegaCorp\": \"2024-03-01\", \"GlobalTech\": \"2024-03-15\"}}", "tool_call_id": "call_4"},
+      {"role": "user", "content": "We need to migrate user data from the old schema to support multi-tenancy. How should we approach this?"}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific data volumes (2.3M users, 890K subscriptions)",
+        "Mentions concrete migration timeline (72 hours, 15 min downtime)",
+        "Specifies batch size and validation checkpoints from tool results",
+        "References specific database constraints and dependencies",
+        "Includes resource requirements (500GB storage, 25% CPU)",
+        "Mentions upcoming client deadlines (MegaCorp, GlobalTech dates)"
+      ],
+      "personalization": [
+        "Addresses Sarah by name and role (Senior Database Administrator)",
+        "Adapts to user's preference for 'incremental migrations with rollback plans'",
+        "References user's 'obsessive about data integrity' characteristic",
+        "Acknowledges user's PostgreSQL performance tuning expertise",
+        "Considers user's zero-downtime migration specialization"
+      ],
+      "actionability": [
+        "Provides specific migration strategy (incremental with dual-write)",
+        "Offers concrete timeline with preparation phases",
+        "Suggests specific testing and validation steps",
+        "Recommends resource allocation and scheduling",
+        "Provides rollback strategy given user's concerns about data integrity"
+      ],
+      "context_utilization": [
+        "Uses tool results showing current database load (65% CPU, 78% memory)",
+        "References schema complexity analysis (12 dependencies, circular refs)",
+        "Incorporates compliance requirements (SOC2, GDPR, HIPAA)",
+        "Mentions current performance constraints approaching limits",
+        "Uses historical migration success patterns from user's history"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Sarah Kim",
+        "role": "Senior Database Administrator",
+        "team": "Data Platform Engineering",
+        "preferences": "prefers incremental migrations with rollback plans, obsessive about data integrity",
+        "specialization": "PostgreSQL performance tuning, zero-downtime migrations",
+        "history": [
+          {"type": "migration", "target": "user_profiles table", "date": "2024-01-10", "result": "success", "duration": "0m", "notes": "1.8M records, online schema change"},
+          {"type": "migration", "target": "payment_methods table", "date": "2023-12-15", "result": "success", "duration": "5m", "notes": "850K records, blue-green migration"},
+          {"type": "migration", "target": "session_tokens table", "date": "2023-11-20", "result": "success", "duration": "0m", "notes": "12M records, incremental backfill"}
+        ]
+      },
+      "project_context": {
+        "repo": "user-service",
+        "tech_stack": ["Python 3.11", "Django 4.2", "PostgreSQL 15", "Redis 7", "Docker", "Celery"],
+        "current_version": "v2.1.0",
+        "infrastructure": {
+          "production": {"instances": "db.r6g.2xlarge", "storage": "2TB SSD", "connections": "500 max"},
+          "staging": {"instances": "db.r6g.large", "storage": "500GB SSD", "connections": "100 max"},
+          "monitoring": ["CloudWatch", "pganalyze", "DataDog"],
+          "deployment_pattern": "rolling-update"
+        },
+        "current_state": {
+          "health_status": "healthy but approaching limits",
+          "active_alerts": 2,
+          "database_load": "65% CPU, 78% memory",
+          "table_stats": [
+            {"name": "users", "rows": "2.3M", "size": "180GB", "growth": "50K/month"},
+            {"name": "user_profiles", "rows": "2.3M", "size": "45GB", "growth": "50K/month"},
+            {"name": "organizations", "rows": "15K", "size": "2GB", "growth": "200/month"},
+            {"name": "subscriptions", "rows": "890K", "size": "12GB", "growth": "15K/month"}
+          ]
+        },
+        "requirements": {
+          "data_isolation": "schema-level separation required",
+          "compliance": ["SOC2", "GDPR", "HIPAA"],
+          "performance_sla": "< 200ms query response time",
+          "uptime_sla": "99.9% availability",
+          "upcoming_clients": [
+            {"name": "MegaCorp", "users": "50K", "go_live": "2024-03-01"},
+            {"name": "GlobalTech", "users": "25K", "go_live": "2024-03-15"},
+            {"name": "Enterprise Solutions", "users": "100K", "go_live": "2024-04-01"}
+          ]
+        },
+        "recent_changes": [
+          {"version": "v2.1.0", "changes": "Added tenant isolation framework"},
+          {"version": "v2.0.5", "changes": "Optimized user profile queries"},
+          {"version": "v2.0.4", "changes": "Fixed subscription billing edge cases"}
+        ]
+      }
+    }
+  },
+  {
+    "name": "Performance Issue Scenario", 
+    "standard_messages": [
+      {"role": "system", "content": "You are a performance engineering assistant. When responding: 1) Be specific - reference exact metrics, service versions, and performance thresholds, 2) Personalize - address users by name/role and adapt to their performance monitoring expertise and team context, 3) Be actionable - provide concrete optimization steps and specific monitoring configurations, 4) Use context - incorporate monitoring data, SLA requirements, historical performance patterns, and all available information to inform your recommendations."},
+      {"role": "user", "content": "Mike here, we're getting alerts about API performance"},
+      {"role": "assistant", "content": "Hi Mike! Let me check the current performance metrics first to understand what we're dealing with.", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "get_performance_metrics", "arguments": "{\"service\": \"api-gateway\", \"timeframe\": \"1h\"}"}}]},
+      {"role": "tool", "content": "{\"service\": \"api-gateway\", \"timeframe\": \"1h\", \"p50_response_time\": \"280ms\", \"p95_response_time\": \"450ms\", \"p99_response_time\": \"1200ms\", \"throughput\": \"12K req/sec\", \"error_rate\": \"2.3%\", \"cpu_usage\": \"85%\", \"memory_usage\": \"78%\"}", "tool_call_id": "call_1"},
+      {"role": "assistant", "content": "I can see the performance issues clearly - P95 is at 450ms which is way above our 200ms SLA. Let me check the baseline metrics for comparison.", "tool_calls": [{"id": "call_2", "type": "function", "function": {"name": "get_performance_metrics", "arguments": "{\"service\": \"api-gateway\", \"timeframe\": \"7d\", \"baseline\": true}"}}]},
+      {"role": "tool", "content": "{\"service\": \"api-gateway\", \"timeframe\": \"7d\", \"baseline\": true, \"p50_response_time\": \"85ms\", \"p95_response_time\": \"150ms\", \"p99_response_time\": \"300ms\", \"throughput\": \"15K req/sec\", \"error_rate\": \"0.1%\"}", "tool_call_id": "call_2"},
+      {"role": "user", "content": "Response times are way up. Our P95 went from 150ms to 450ms overnight. The monitoring dashboard is showing red across the board."},
+      {"role": "assistant", "content": "Exactly - that's a 300% increase in P95 response time. Let me check if there were any recent deployments that might correlate with this.", "tool_calls": [{"id": "call_3", "type": "function", "function": {"name": "get_deployment_history", "arguments": "{\"service\": \"api-gateway\", \"timeframe\": \"48h\"}"}}]},
+      {"role": "tool", "content": "{\"deployments\": [{\"version\": \"v3.4.1\", \"timestamp\": \"2024-01-15T14:30:00Z\", \"status\": \"success\", \"changes\": \"JWT validation optimization, rate limiting bug fix, dependency updates\"}], \"correlation\": \"performance degradation started 2h after v3.4.1 deployment\"}", "tool_call_id": "call_3"},
+      {"role": "user", "content": "We did deploy v3.4.1 yesterday, but it was mostly bug fixes. Nothing that should impact performance this much."},
+      {"role": "assistant", "content": "The timing is suspicious - performance degraded 2 hours after the v3.4.1 deployment. Let me check the application logs for any error patterns.", "tool_calls": [{"id": "call_4", "type": "function", "function": {"name": "analyze_error_logs", "arguments": "{\"service\": \"api-gateway\", \"timeframe\": \"2h\", \"severity\": \"error\"}"}}]},
+      {"role": "tool", "content": "{\"error_patterns\": [{\"message\": \"JWT validation timeout\", \"count\": 1423, \"first_seen\": \"2024-01-15T16:45:00Z\"}, {\"message\": \"Database connection pool exhausted\", \"count\": 234, \"first_seen\": \"2024-01-15T17:12:00Z\"}], \"total_errors\": 1657}", "tool_call_id": "call_4"},
+      {"role": "assistant", "content": "Found the issue! We're seeing JWT validation timeouts and database connection pool exhaustion. The 'JWT validation optimization' in v3.4.1 seems to have introduced a bottleneck."},
+      {"role": "user", "content": "API response times have increased 300% since last week. Need to diagnose and fix this immediately."}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific performance metrics (P95: 450ms vs 150ms baseline)",
+        "Mentions concrete error patterns (JWT validation timeout, 1423 occurrences)",
+        "Correlates performance degradation with v3.4.1 deployment timing",
+        "Includes specific resource utilization (85% CPU, 78% memory)",
+        "References exact error counts and database connection issues",
+        "Mentions SLA violations (P95 > 200ms target)"
+      ],
+      "personalization": [
+        "Addresses Mike by name and role (Senior Backend Engineer)",
+        "Adapts to user's 'methodical debugging' approach",
+        "References user's 'believes in data-driven decisions' characteristic",
+        "Acknowledges user's Go performance optimization expertise",
+        "Considers user's distributed systems debugging experience"
+      ],
+      "actionability": [
+        "Provides specific root cause identification (JWT optimization bottleneck)",
+        "Offers concrete remediation steps based on error analysis",
+        "Suggests specific rollback or configuration changes",
+        "Recommends immediate monitoring and validation steps",
+        "Provides timeline for resolution based on deployment correlation"
+      ],
+      "context_utilization": [
+        "Uses tool results showing current vs baseline performance metrics",
+        "References deployment history correlation with performance issues",
+        "Incorporates error log analysis showing specific bottlenecks",
+        "Mentions user's incident response history and successful patterns",
+        "Uses infrastructure context (12 instances, auto-scaling enabled)"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Mike Rodriguez",
+        "role": "Senior Backend Engineer", 
+        "team": "API Platform",
+        "preferences": "methodical debugging, monitors everything, believes in data-driven decisions",
+        "specialization": "Go performance optimization, distributed systems debugging",
+        "history": [
+          {"type": "incident", "issue": "memory leak in cache", "date": "2024-01-12", "result": "resolved", "duration": "2h", "notes": "goroutine leak"},
+          {"type": "incident", "issue": "database connection pool exhaustion", "date": "2023-12-20", "result": "resolved", "duration": "45m", "notes": "config change"},
+          {"type": "incident", "issue": "rate limiting false positives", "date": "2023-11-15", "result": "resolved", "duration": "1.5h", "notes": "Redis failover"}
+        ]
+      },
+      "project_context": {
+        "repo": "api-gateway",
+        "tech_stack": ["Go 1.21", "MongoDB 7.0", "Redis 7", "Prometheus", "Grafana", "Jaeger"],
+        "current_version": "v3.4.1",
+        "infrastructure": {
+          "production": {"instances": 12, "type": "c6g.2xlarge", "auto_scaling": "enabled"},
+          "staging": {"instances": 3, "type": "c6g.large", "auto_scaling": "disabled"},
+          "monitoring": ["Prometheus", "Grafana", "Jaeger", "PagerDuty"],
+          "deployment_pattern": "canary"
+        },
+        "current_state": {
+          "health_status": "degraded - performance issues",
+          "active_alerts": 3,
+          "performance_metrics": {
+            "p50_response_time": "280ms",
+            "p95_response_time": "450ms",
+            "p99_response_time": "1200ms", 
+            "throughput": "12K req/sec",
+            "error_rate": "2.3%",
+            "cpu_usage": "85%",
+            "memory_usage": "78%"
+          },
+          "baseline_metrics": {
+            "p50_response_time": "85ms",
+            "p95_response_time": "150ms", 
+            "p99_response_time": "300ms",
+            "throughput": "15K req/sec",
+            "error_rate": "0.1%"
+          }
+        },
+        "requirements": {
+          "performance_sla": "P95 < 200ms",
+          "uptime_sla": "99.95%",
+          "error_rate_sla": "< 1%"
+        },
+        "recent_changes": [
+          {"version": "v3.4.1", "changes": "JWT validation optimization, rate limiting bug fix, dependency updates"},
+          {"version": "v3.4.0", "changes": "new user authentication flow, audit logging improvements"},
+          {"version": "v3.3.9", "changes": "security patches, monitoring improvements"}
+        ]
+      }
+    }
+  },
+  {
+    "name": "Security Incident Scenario",
+    "standard_messages": [
+      {"role": "system", "content": "You are a security incident response assistant. When responding: 1) Be specific - reference exact security events, threat indicators, and remediation steps, 2) Personalize - address users by name/role and adapt to their security expertise and team context, 3) Be actionable - provide concrete incident response steps and specific security commands, 4) Use context - incorporate security alerts, threat intelligence, historical incidents, and all available information to inform your recommendations."},
+      {"role": "user", "content": "Emily here, we have a security alert that just came in"},
+      {"role": "assistant", "content": "Hi Emily! Let me immediately pull the current threat intelligence to assess what we're dealing with.", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "analyze_security_alerts", "arguments": "{\"service\": \"payment-service\", \"timeframe\": \"1h\", \"severity\": \"high\"}"}}]},
+      {"role": "tool", "content": "{\"active_alerts\": 5, \"attack_patterns\": [{\"type\": \"credential_stuffing\", \"source_ips\": [\"185.220.101.0/24\", \"198.98.51.0/24\", \"91.229.23.0/24\"], \"failed_attempts\": 15420, \"successful_logins\": 23, \"affected_endpoints\": [\"/api/v1/auth/login\", \"/api/v1/payment/process\"], \"geolocation\": \"Eastern Europe\", \"first_seen\": \"2024-01-16T14:30:00Z\"}], \"threat_level\": \"critical\"}", "tool_call_id": "call_1"},
+      {"role": "assistant", "content": "Critical threat confirmed! We have active credential stuffing from Eastern European IPs with 23 successful breaches. I need to immediately block these IP ranges.", "tool_calls": [{"id": "call_2", "type": "function", "function": {"name": "block_ip_ranges", "arguments": "{\"ip_ranges\": [\"185.220.101.0/24\", \"198.98.51.0/24\", \"91.229.23.0/24\"], \"duration\": \"24h\", \"emergency\": true}"}}]},
+      {"role": "tool", "content": "{\"blocked_ips\": 3, \"rules_deployed\": \"success\", \"propagation_time\": \"45_seconds\", \"affected_traffic\": \"0.3%\", \"false_positive_risk\": \"low\", \"auto_unblock\": \"2024-01-17T16:00:00Z\"}", "tool_call_id": "call_2"},
+      {"role": "user", "content": "Our SIEM is showing unusual API access patterns. Multiple failed authentication attempts followed by successful logins from the same IP blocks."},
+      {"role": "assistant", "content": "I've already blocked the malicious IP ranges. Now I need to identify which accounts were compromised in those 23 successful logins.", "tool_calls": [{"id": "call_3", "type": "function", "function": {"name": "identify_compromised_accounts", "arguments": "{\"source_ips\": [\"185.220.101.0/24\", \"198.98.51.0/24\", \"91.229.23.0/24\"], \"timeframe\": \"2h\", \"successful_only\": true}"}}]},
+      {"role": "tool", "content": "{\"compromised_accounts\": 23, \"account_details\": [{\"user_id\": \"user_8472\", \"email\": \"john.doe@company.com\", \"login_time\": \"2024-01-16T15:23:00Z\", \"accessed_resources\": [\"/api/v1/payment/process\", \"/api/v1/user/profile\"], \"privilege_level\": \"standard\"}, {\"user_id\": \"user_1205\", \"email\": \"admin@company.com\", \"login_time\": \"2024-01-16T15:45:00Z\", \"accessed_resources\": [\"/api/v1/admin/users\"], \"privilege_level\": \"admin\"}], \"high_risk_accounts\": 3}", "tool_call_id": "call_3"},
+      {"role": "user", "content": "Completely unknown. They're coming from a range that's not in our allowlist, and the geolocation shows Eastern Europe. The concerning part is some attempts are succeeding."},
+      {"role": "assistant", "content": "Critical issue - we have an admin account compromise! I need to immediately invalidate all sessions for compromised accounts and force password resets.", "tool_calls": [{"id": "call_4", "type": "function", "function": {"name": "emergency_account_lockdown", "arguments": "{\"compromised_accounts\": [\"user_8472\", \"user_1205\"], \"actions\": [\"invalidate_sessions\", \"force_password_reset\", \"disable_api_access\"], \"notify_users\": true}"}}]},
+      {"role": "tool", "content": "{\"accounts_locked\": 23, \"sessions_invalidated\": 47, \"password_resets_sent\": 23, \"api_access_revoked\": 23, \"notifications_sent\": 23, \"admin_accounts_affected\": 3, \"escalation_triggered\": true}", "tool_call_id": "call_4"},
+      {"role": "assistant", "content": "All compromised accounts are now locked down. Let me run forensic analysis to understand the attack vector and ensure we haven't missed anything.", "tool_calls": [{"id": "call_5", "type": "function", "function": {"name": "forensic_analysis", "arguments": "{\"attack_timeframe\": \"4h\", \"include_lateral_movement\": true, \"check_data_exfiltration\": true}"}}]},
+      {"role": "tool", "content": "{\"attack_vector\": \"credential_stuffing_with_leaked_passwords\", \"lateral_movement\": \"none_detected\", \"data_accessed\": [\"user_profiles\", \"payment_methods\"], \"data_exfiltrated\": \"none_confirmed\", \"persistence_mechanisms\": \"none_found\", \"attack_duration\": \"2h_15m\", \"recommended_actions\": [\"audit_all_logins_24h\", \"deploy_additional_mfa\", \"review_password_policies\"]}", "tool_call_id": "call_5"},
+      {"role": "user", "content": "Working on that now. We detected suspicious API calls from an unknown IP range. Need to secure the system immediately."}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific attack metrics (15,420 failed attempts, 23 successful)",
+        "Mentions concrete IP ranges and geolocation (Eastern Europe)",
+        "Identifies specific compromised accounts including admin access",
+        "Includes exact blocking timeline (45 seconds propagation)",
+        "References specific attack vector (credential stuffing with leaked passwords)",
+        "Mentions compliance implications (PCI DSS, SOC 2, ISO 27001)"
+      ],
+      "personalization": [
+        "Addresses Emily by name and role (Senior Security Engineer)",
+        "Adapts to user's 'block first, analyze later' preference",
+        "References user's 'assume breach mentality' approach",
+        "Acknowledges user's incident response specialization",
+        "Considers user's comprehensive logging preferences"
+      ],
+      "actionability": [
+        "Provides immediate IP blocking and account lockdown steps",
+        "Offers specific forensic analysis and evidence collection",
+        "Suggests concrete session invalidation and password resets",
+        "Recommends specific compliance notification procedures",
+        "Provides timeline for incident containment and recovery"
+      ],
+      "context_utilization": [
+        "Uses tool results showing real-time threat intelligence",
+        "References emergency response patterns from user's history",
+        "Incorporates compliance requirements for notification timing",
+        "Mentions user's successful past incident patterns (3m, 15m, 8m resolution)",
+        "Uses infrastructure context (8 instances, multiple regions)"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Emily Chen",
+        "role": "Senior Security Engineer",
+        "team": "Security Operations Center",
+        "preferences": "block first, analyze later, comprehensive logging, assume breach mentality", 
+        "specialization": "Incident response, threat analysis, compliance frameworks",
+        "history": [
+          {"type": "incident", "issue": "SQL injection attempt", "date": "2024-01-10", "result": "blocked", "duration": "3m", "notes": "WAF rule deployment"},
+          {"type": "incident", "issue": "DDoS attack", "date": "2023-12-15", "result": "mitigated", "duration": "15m", "notes": "rate limiting + CDN"},
+          {"type": "incident", "issue": "credential stuffing", "date": "2023-11-20", "result": "blocked", "duration": "8m", "notes": "IP blocking + MFA enforcement"}
+        ]
+      },
+      "project_context": {
+        "repo": "payment-service",
+        "tech_stack": ["Java 17", "Spring Boot 3.2", "PostgreSQL 15", "AWS WAF", "Redis", "OAuth 2.0"],
+        "current_version": "v2.5.1",
+        "infrastructure": {
+          "production": {"instances": 8, "regions": ["us-east-1", "eu-west-1"], "type": "c5.xlarge"},
+          "staging": {"instances": 2, "regions": ["us-east-1"], "type": "c5.large"},
+          "monitoring": ["Splunk SIEM", "GuardDuty", "Security Hub", "CloudTrail"],
+          "deployment_pattern": "blue-green"
+        },
+        "current_state": {
+          "health_status": "under attack - credential stuffing",
+          "active_alerts": 5,
+          "threat_details": {
+            "ip_ranges": ["185.220.101.0/24", "198.98.51.0/24", "91.229.23.0/24"],
+            "attack_pattern": "credential stuffing + API enumeration",
+            "failed_attempts": 15420,
+            "successful_logins": 23,
+            "affected_endpoints": ["/api/v1/auth/login", "/api/v1/payment/process", "/api/v1/user/profile"],
+            "timeframe": "last 2 hours"
+          }
+        },
+        "requirements": {
+          "compliance": ["PCI DSS", "SOC 2", "ISO 27001"],
+          "response_time": "< 5 minutes for high severity",
+          "data_retention": "7 years for audit logs"
+        },
+        "recent_changes": [
+          {"version": "v2.5.1", "changes": "Enhanced rate limiting, improved audit logging"},
+          {"version": "v2.5.0", "changes": "OAuth 2.0 implementation, MFA for admin users"},
+          {"version": "v2.4.8", "changes": "WAF rule updates, encryption improvements"}
+        ]
+      }
+    }
+  },
+  {
+    "name": "Code Review Scenario",
+    "standard_messages": [
+      {"role": "system", "content": "You are a code review assistant. When responding: 1) Be specific - reference exact code locations, security vulnerabilities, and remediation techniques, 2) Personalize - address users by name/role and adapt to their development expertise and team context, 3) Be actionable - provide concrete code fixes and specific security improvements, 4) Use context - incorporate code analysis results, security scan findings, coding standards, and all available information to inform your recommendations."},
+      {"role": "user", "content": "Lisa here, I need help reviewing a critical pull request"},
+      {"role": "assistant", "content": "Hi Lisa! Let me pull up the PR details first to understand what we're reviewing.", "tool_calls": [{"id": "call_1", "type": "function", "function": {"name": "analyze_pull_request", "arguments": "{\"pr_id\": \"PR-1847\", \"include_diff\": true, \"include_metrics\": true}"}}]},
+      {"role": "tool", "content": "{\"pr_id\": \"PR-1847\", \"title\": \"Refactor JWT validation and implement permission caching\", \"author\": \"dev-alex-smith\", \"files_changed\": 12, \"lines_added\": 450, \"lines_deleted\": 320, \"complexity_score\": \"high\", \"modified_files\": [\"auth/jwt_validator.py\", \"auth/permission_cache.py\", \"middleware/auth_middleware.py\"], \"security_sensitive\": true, \"performance_claims\": \"40% improvement\"}", "tool_call_id": "call_1"},
+      {"role": "assistant", "content": "This is indeed a significant PR - 12 files with high complexity score affecting core authentication. Let me run a comprehensive security scan first.", "tool_calls": [{"id": "call_2", "type": "function", "function": {"name": "run_security_scan", "arguments": "{\"pr_id\": \"PR-1847\", \"scan_types\": [\"static_analysis\", \"dependency_check\", \"secret_detection\", \"owasp_top10\"], \"focus_areas\": [\"jwt_validation\", \"permission_caching\"]}"}}]},
+      {"role": "tool", "content": "{\"scan_results\": {\"critical\": 2, \"high\": 4, \"medium\": 8, \"low\": 12}, \"findings\": [{\"severity\": \"critical\", \"type\": \"privilege_escalation\", \"file\": \"auth/permission_cache.py\", \"line\": 127, \"description\": \"Cache key collision allows cross-user permission inheritance\"}, {\"severity\": \"critical\", \"type\": \"token_replay\", \"file\": \"auth/jwt_validator.py\", \"line\": 89, \"description\": \"Missing jti claim validation enables token replay attacks\"}], \"owasp_violations\": [\"A01:2021-Broken_Access_Control\", \"A07:2021-Identification_and_Authentication_Failures\"]}", "tool_call_id": "call_2"},
+      {"role": "user", "content": "It's a major refactor of our authentication middleware. The developer claims it improves performance by 40%, but I'm concerned about security implications."},
+      {"role": "assistant", "content": "Your concerns are justified! The security scan found 2 critical vulnerabilities - exactly the issues you suspected. Let me run a performance analysis to verify the 40% claim.", "tool_calls": [{"id": "call_3", "type": "function", "function": {"name": "benchmark_performance", "arguments": "{\"pr_id\": \"PR-1847\", \"test_scenarios\": [\"concurrent_auth\", \"permission_lookup\", \"jwt_validation\"], \"baseline_branch\": \"main\"}"}}]},
+      {"role": "tool", "content": "{\"performance_results\": {\"jwt_validation\": {\"baseline\": \"12ms\", \"pr_branch\": \"7ms\", \"improvement\": \"41.7%\"}, \"permission_lookup\": {\"baseline\": \"8ms\", \"pr_branch\": \"3ms\", \"improvement\": \"62.5%\"}, \"concurrent_auth\": {\"baseline\": \"45ms\", \"pr_branch\": \"28ms\", \"improvement\": \"37.8%\"}}, \"overall_improvement\": \"40.1%\", \"performance_validated\": true, \"bottlenecks_resolved\": [\"redundant_db_queries\", \"inefficient_redis_usage\"]}", "tool_call_id": "call_3"},
+      {"role": "user", "content": "The PR introduces a new JWT validation flow and caches user permissions in Redis. I want to make sure we're not introducing any privilege escalation or token replay vulnerabilities."},
+      {"role": "assistant", "content": "Both vulnerabilities you were concerned about are present! Let me analyze the authentication flow architecture to understand the full impact.", "tool_calls": [{"id": "call_4", "type": "function", "function": {"name": "analyze_auth_architecture", "arguments": "{\"pr_id\": \"PR-1847\", \"check_patterns\": [\"privilege_escalation\", \"session_management\", \"cache_security\", \"token_lifecycle\"]}"}}]},
+      {"role": "tool", "content": "{\"architecture_analysis\": {\"auth_flow_changes\": 8, \"security_patterns\": {\"followed\": [\"input_validation\", \"secure_defaults\"], \"violated\": [\"defense_in_depth\", \"principle_of_least_privilege\"]}, \"cache_implementation\": {\"redis_security\": \"weak\", \"key_collision_risk\": \"high\", \"ttl_management\": \"good\"}, \"jwt_implementation\": {\"algorithm_security\": \"strong\", \"claim_validation\": \"incomplete\", \"replay_protection\": \"missing\"}}, \"recommended_fixes\": 6}", "tool_call_id": "call_4"},
+      {"role": "assistant", "content": "The analysis confirms serious architectural issues. Let me generate a detailed review with specific recommendations for fixes.", "tool_calls": [{"id": "call_5", "type": "function", "function": {"name": "generate_code_review", "arguments": "{\"pr_id\": \"PR-1847\", \"include_security_fixes\": true, \"include_performance_notes\": true, \"reviewer_expertise\": \"authentication_security\"}"}}]},
+      {"role": "tool", "content": "{\"review_summary\": {\"security_issues\": 6, \"performance_validated\": true, \"architecture_concerns\": 3, \"fix_recommendations\": [{\"file\": \"auth/permission_cache.py\", \"fix\": \"Add user_id prefix to cache keys to prevent collision\"}, {\"file\": \"auth/jwt_validator.py\", \"fix\": \"Implement jti claim tracking in Redis blacklist\"}, {\"file\": \"middleware/auth_middleware.py\", \"fix\": \"Add request rate limiting per user\"}]}, \"approval_recommendation\": \"BLOCK_until_critical_fixes\", \"estimated_fix_time\": \"4_hours\"}", "tool_call_id": "call_5"},
+      {"role": "user", "content": "Review this pull request for security vulnerabilities and performance issues before we merge to main."}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific vulnerability types (privilege escalation, token replay)",
+        "Mentions concrete performance improvements (40% validated, 41.7% JWT validation)",
+        "Identifies specific files and line numbers (auth/permission_cache.py:127)",
+        "Includes exact scan results (2 critical, 4 high, 8 medium vulnerabilities)",
+        "References specific OWASP violations (A01:2021, A07:2021)",
+        "Mentions concrete fix timeline (4 hours estimated)"
+      ],
+      "personalization": [
+        "Addresses Lisa by name and role (Staff Software Engineer)",
+        "Adapts to user's 'security-first mindset' approach",
+        "References user's 'thorough code reviews' preference",
+        "Acknowledges user's authentication systems expertise",
+        "Considers user's cryptography and secure coding specialization"
+      ],
+      "actionability": [
+        "Provides specific vulnerability fixes (cache key prefixing, jti tracking)",
+        "Offers concrete review recommendations (BLOCK until critical fixes)",
+        "Suggests specific testing requirements (OWASP Top 10 coverage)",
+        "Recommends specific architectural improvements",
+        "Provides clear approval/rejection decision with rationale"
+      ],
+      "context_utilization": [
+        "Uses tool results showing detailed security scan findings",
+        "References performance benchmarking validation of claims",
+        "Incorporates user's past security review patterns and discoveries",
+        "Mentions current implementation details (RS256, 15min expiry)",
+        "Uses project's testing and review requirements (95% coverage)"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Lisa Park",
+        "role": "Staff Software Engineer",
+        "team": "Platform Security",
+        "preferences": "thorough code reviews, security-first mindset, performance optimization, zero-trust architecture",
+        "specialization": "Authentication systems, cryptography, secure coding practices",
+        "history": [
+          {"type": "code_review", "target": "OAuth 2.0 implementation", "date": "2024-01-12", "result": "3 critical security issues found", "duration": "2h", "notes": "caught privilege escalation vulnerability before merge"},
+          {"type": "code_review", "target": "JWT token refresh", "date": "2024-01-05", "result": "1 medium security issue found", "duration": "45m", "notes": "token expiration handling improvement"},
+          {"type": "code_review", "target": "User session management", "date": "2023-12-20", "result": "2 high severity issues found", "duration": "1.5h", "notes": "performance bottleneck + session hijacking vector"}
+        ]
+      },
+      "project_context": {
+        "repo": "user-authentication",
+        "tech_stack": ["Python 3.11", "Django 4.2", "Redis 7", "PostgreSQL 15", "Celery", "JWT"],
+        "current_version": "v3.2.0",
+        "infrastructure": {
+          "production": {"instances": 4, "regions": ["us-east-1", "us-west-2"], "type": "c5.large"},
+          "staging": {"instances": 2, "regions": ["us-east-1"], "type": "c5.medium"},
+          "monitoring": ["DataDog", "SIEM", "Security Hub"],
+          "deployment_pattern": "feature-branch"
+        },
+        "current_state": {
+          "health_status": "healthy",
+          "active_alerts": 0,
+          "pull_request": {
+            "id": "PR-1847",
+            "title": "Refactor JWT validation and implement permission caching",
+            "author": "dev-alex-smith",
+            "files_changed": 12,
+            "lines_added": 450,
+            "lines_deleted": 320,
+            "complexity_score": "high"
+          },
+          "current_implementation": {
+            "jwt_algorithm": "RS256",
+            "token_expiry": "15 minutes",
+            "refresh_token_expiry": "7 days",
+            "permission_cache_ttl": "5 minutes",
+            "max_concurrent_sessions": 3
+          }
+        },
+        "requirements": {
+          "security": {
+            "authentication": "JWT with RS256 signing",
+            "session_management": "stateless with Redis backup",
+            "permission_model": "RBAC with resource-level controls",
+            "audit_logging": "all auth events logged to SIEM"
+          },
+          "testing": {
+            "unit_tests": "95% coverage required",
+            "security_tests": "OWASP Top 10 coverage",
+            "performance_tests": "load testing with 10K concurrent users",
+            "penetration_testing": "scheduled for staging deployment"
+          },
+          "code_review": {
+            "security_review": "mandatory for auth changes",
+            "performance_review": "required for claimed optimizations",
+            "architectural_review": "required for middleware changes"
+          }
+        },
+        "recent_changes": [
+          {"version": "v3.2.0", "changes": "Enhanced JWT validation, Redis permission caching implementation"},
+          {"version": "v3.1.5", "changes": "Security patch for session management"},
+          {"version": "v3.1.4", "changes": "Performance optimization for user lookup"}
+        ]
+      }
+    }
+  },
+  {
+    "name": "Pure Context Engineering Scenario",
+    "standard_messages": [
+      {"role": "system", "content": "You are a technical consultant. When responding: 1) Be specific - reference exact technical details, version numbers, and implementation approaches, 2) Personalize - address users by name/role and adapt to their technical expertise and team context, 3) Be actionable - provide concrete implementation steps and specific technical recommendations, 4) Use context - incorporate all available technical information, requirements, constraints, and data to inform your recommendations."},
+      {"role": "user", "content": "I need to plan a production deployment for our e-commerce platform. What's the best approach given our current situation?"}
+    ],
+    "evaluation_criteria": {
+      "specificity": [
+        "References specific technologies from our stack (Node.js, PostgreSQL, Redis)",
+        "Mentions our current traffic volumes and capacity constraints",
+        "Acknowledges our peak shopping season timing (Q4 holiday rush)",
+        "References specific infrastructure regions and availability zones",
+        "Includes our compliance requirements (PCI DSS, SOX)",
+        "Mentions our deployment SLA requirements (99.99% uptime)"
+      ],
+      "personalization": [
+        "Addresses Jordan by name and role (Principal Engineering Manager)",
+        "Adapts to user's preference for 'gradual rollouts with extensive monitoring'",
+        "References user's 'zero-downtime deployment' specialization",
+        "Acknowledges user's experience with high-traffic e-commerce platforms",
+        "Considers user's team size and engineering capacity constraints"
+      ],
+      "actionability": [
+        "Provides specific deployment timeline recommendations",
+        "Offers concrete pre-deployment validation steps",
+        "Suggests specific rollback procedures and criteria",
+        "Recommends capacity planning based on traffic projections",
+        "Provides infrastructure scaling recommendations"
+      ],
+      "context_utilization": [
+        "Uses traffic pattern data to inform deployment timing",
+        "References past deployment history and lessons learned",
+        "Incorporates current system performance metrics",
+        "Mentions team availability and holiday schedule constraints",
+        "Uses compliance audit timeline to influence deployment windows"
+      ]
+    },
+    "context": {
+      "user_profile": {
+        "name": "Jordan Kim",
+        "role": "Principal Engineering Manager", 
+        "team": "E-commerce Platform",
+        "preferences": "gradual rollouts with extensive monitoring, prefers blue-green deployments, avoids deployments during peak traffic",
+        "specialization": "High-traffic e-commerce systems, zero-downtime deployments",
+        "history": [
+          {"type": "deployment", "version": "v2.8.0", "date": "2024-01-15", "result": "success", "duration": "45m", "notes": "black friday prep, 2.3M concurrent users handled"},
+          {"type": "incident", "issue": "payment gateway timeout", "date": "2024-01-08", "result": "resolved", "duration": "12m", "notes": "peak traffic surge, rapid rollback"},
+          {"type": "deployment", "version": "v2.7.5", "date": "2023-12-20", "result": "success", "duration": "30m", "notes": "holiday season deployment, no customer impact"}
+        ]
+      },
+      "project_context": {
+        "repo": "ecommerce-platform",
+        "tech_stack": ["Node.js 18", "PostgreSQL 15", "Redis 7", "Docker", "Kubernetes 1.28", "Nginx", "React 18"],
+        "current_version": "v2.8.1",
+        "infrastructure": {
+          "production": {
+            "instances": 24,
+            "regions": ["us-east-1", "us-west-2", "eu-west-1"],
+            "type": "c6g.2xlarge",
+            "auto_scaling": "enabled",
+            "peak_capacity": "15K req/sec"
+          },
+          "monitoring": ["DataDog", "PagerDuty", "Grafana", "Sentry"],
+          "deployment_pattern": "blue-green with canary"
+        },
+        "current_state": {
+          "health_status": "healthy",
+          "active_alerts": 1,
+          "traffic_volume": "current: 8.5K req/sec, peak: 12K req/sec",
+          "performance_metrics": {
+            "p95_response_time": "185ms",
+            "error_rate": "0.08%",
+            "uptime": "99.97%"
+          },
+          "upcoming_events": [
+            {"name": "Black Friday", "date": "2024-11-29", "expected_traffic": "300% increase"},
+            {"name": "Cyber Monday", "date": "2024-12-02", "expected_traffic": "250% increase"},
+            {"name": "Holiday Shopping", "period": "2024-12-01 to 2024-12-25", "expected_traffic": "200% baseline"}
+          ]
+        },
+        "requirements": {
+          "uptime_sla": "99.99%",
+          "compliance": ["PCI DSS Level 1", "SOX", "GDPR"],
+          "audit_schedule": "SOX audit: 2024-12-15, PCI review: 2024-11-30",
+          "deployment_windows": "avoid Nov 20 - Dec 31 for major changes",
+          "rollback_time": "< 3 minutes",
+          "capacity_requirements": "handle 5x normal traffic during peak events"
+        },
+        "recent_changes": [
+          {"version": "v2.8.1", "changes": "performance optimizations for checkout flow, Redis cache improvements"},
+          {"version": "v2.8.0", "changes": "new payment processing engine, enhanced fraud detection"},
+          {"version": "v2.7.9", "changes": "black friday preparation, database query optimizations"}
+        ]
+      }
+    }
+  }
+]
